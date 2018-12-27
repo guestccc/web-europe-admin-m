@@ -1,0 +1,11 @@
+@mixin dk-icon{
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  margin-right: 16px;
+  background-size: cover;
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
+}

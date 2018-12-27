@@ -1,0 +1,19 @@
+@import "mixins";
+.dk-icon-order{
+  background: url('assets/images/menu-icon/ic_nav_order_normal.png') no-repeat center center ;
+  @include dk-icon;
+
+}
+.dk-icon-order-active{
+  background: url('assets/images/menu-icon/ic_nav_order_light.png') no-repeat center center ;
+  @include dk-icon;
+}
+.dk-icon-home{
+  background: url('assets/images/menu-icon/ic_nav_home_normal.png') no-repeat center center ;
+  @include dk-icon;
+}
+.dk-icon-home-active{
+  background: url('assets/images/menu-icon/ic_nav_home_light.png') no-repeat center center ;
+  @include dk-icon;
+}
+
