@@ -9,6 +9,8 @@ export default {
           operationList = value.operations
         }
       })
+      console.log(operationList);
+
       return operationList
     },
   },

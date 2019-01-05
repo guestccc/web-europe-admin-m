@@ -1,5 +1,6 @@
 <template>
   <el-container class="full">
+    <!-- 侧边 -->
     <el-aside width="200px">
       <side-bar>
         <div
@@ -17,10 +18,16 @@
         </div>
       </side-bar>
     </el-aside>
-    <el-main class="no-padding">
-      <top-bar/>
+    <el-container class="full-height bg-gray">
+      <!-- 头部 -->
+      <el-header
+        class="no-padding"
+        style="height:73px">
+        <top-bar/>
+      </el-header>
+      <!-- 主体 -->
       <router-view/>
-    </el-main>
+    </el-container>
   </el-container>
 </template>
 <script>
@@ -34,9 +41,15 @@ import { pms2MenuList, decrypt } from '../filters/filter'
 
 export default {
   data() {
+    const item = {
+      date: '2016-05-02',
+      name: '王小虎',
+      address: '上海市普陀区金沙江路 1518 弄',
+    };
     return {
       permissionList: [],
       menuList: [],
+      tableData: Array(20).fill(item),
     };
   },
   components: {

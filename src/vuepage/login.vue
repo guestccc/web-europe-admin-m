@@ -18,7 +18,9 @@
             <div class="boder-one"/>
             <input
               class="input"
-              placeholder="请输入账号" >
+              placeholder="请输入账号"
+              v-model="body.account"
+            >
           </div>
           <div class="edit-box">
             <img
@@ -28,6 +30,7 @@
             <input
               class="input"
               type="password"
+              v-model="body.password"
               placeholder="请输入密码" >
           </div>
           <div class="verify-box">
@@ -67,20 +70,76 @@
 
 import { encrypt } from '../filters/filter'
 import { SET_OPERATIONS_MAP } from '@/vuex/modules/base/mutation-types'
+import { login } from '@/api/login'
 
 export default {
   data() {
     return {
       code: '',
+      body: {
+        account: 'admin',
+        password: '123456',
+      },
       permissionList: [
+        // {
+        //   name: '样例管理',
+        //   children: [
+        //     {
+        //       name: '批量下载',
+        //     },
+        //     {
+        //       name: '操作权限控制',
+        //     },
+        //     {
+        //       name: 'xx列表',
+        //     },
+        //   ],
+        // },
         {
-          name: '样例管理',
+          name: '商品管理',
           children: [
+            // {
+            //   name: '商品详情',
+            // },
             {
-              name: '批量下载',
+              name: '商品列表',
             },
             {
-              name: '操作权限控制',
+              name: '积分商品列表',
+            },
+            {
+              name: '分类列表',
+            },
+          ],
+        },
+        {
+          name: '内容管理',
+          children: [
+            {
+              name: '轮播图管理',
+            },
+            {
+              name: '关于我们',
+            },
+            {
+              name: '常见问题',
+            },
+            {
+              name: '热门搜索',
+            },
+            {
+              name: '意见反馈',
+            },
+            {
+              name: '条件设置',
+            },
+          ],
+        },
+        {
+          name: '物流管理',
+          children: [
+            {
+              name: '物流单列表',
             },
           ],
         },
@@ -108,22 +167,28 @@ export default {
         },
 
         onLogin() {
-          const jsonStrPer = JSON.stringify(self.permissionList)
-          // 对权限列表进行加密
-          const encryptPer = encrypt(jsonStrPer).toString()
-          sessionStorage.setItem('permission', encryptPer)
-          // 存储操作列表到store
-          self.$store.commit(SET_OPERATIONS_MAP, self.operationList)
-          self.$router.push({
-            path: 'index',
-          });
+          self.network().login()
         },
       };
     },
 
     network() {
       return {
-        getListA() {},
+        login: async () => {
+          const { status, data } = await login(this.body)
+          if (status !== 200) return
+          sessionStorage.setItem('adminName', data.user_info.name)
+          sessionStorage.setItem('token', data.token.access_token)
+          const jsonStrPer = JSON.stringify(this.permissionList)
+          // 对权限列表进行加密
+          const encryptPer = encrypt(jsonStrPer).toString()
+          sessionStorage.setItem('permission', encryptPer)
+          // 存储操作列表到store
+          this.$store.commit(SET_OPERATIONS_MAP, this.operationList)
+          this.$router.push({
+            path: 'index',
+          });
+        },
       };
     },
 
@@ -170,13 +235,14 @@ export default {
     }
     .main {
       flex: 1;
-      padding: 147px 0 138px 0;
-      background: url(../assets/images/backgrou-img.jpg) center center fixed;
+      background: url(../assets/images/backgrou-img.png) center center fixed;
       background-size: cover;
+      display: flex;
+      justify-content: center;
+      align-items: center;
       .login-box {
         width: 371px;
         height: 341px;
-        margin: auto auto;
         background-color: #ffffff;
         .title-box-login {
           background: url(../assets/images/Oval_Copy_3@3x.png)  no-repeat;

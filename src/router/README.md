@@ -1,15 +1,19 @@
+# 路由架构
+
+# 路由架构示例
+
+```javascript
 import Container from '@/vuepage/example/index';
 
 import ExampleList from '../vuepage/example/list';
 import ExampleEditor from '../vuepage/example/editor';
-import MultiPleDownload from '../vuepage/example/multiple-download'
-import Operation from '@/vuepage/example/operation-filter'
 
 export default [
   {
-    path: '/example-management',
+    path: '/example-management', // 模块路由
     component: Container,
     children: [
+      // 侧边栏二级
       {
         path: 'example-list',
         component: ExampleList,
@@ -20,7 +24,7 @@ export default [
           },
           {
             name: '/xx列表',
-            url: 'example-list',
+            url: 'example-list', // 不加斜杠，拼接在父路由后面
           },
         ],
       },
@@ -42,34 +46,12 @@ export default [
           },
         ],
       },
-      {
-        path: 'multiple-download',
-        component: MultiPleDownload,
-        meta: [
-          {
-            name: '样例管理',
-            url: '/example-management',
-          },
-          {
-            name: '批量下载',
-            url: 'multiple-download',
-          },
-        ],
-      },
-      {
-        path: 'operation',
-        component: Operation,
-        meta: [
-          {
-            name: '样例管理',
-            url: '/example-management',
-          },
-          {
-            name: '操作权限控制',
-            url: 'operation',
-          },
-        ],
-      },
     ],
   },
 ];
+
+```
+
+> 1. 相同大模块下所有路由的`meta`属性数组的`第一项`中的`url`，是统一的，用于侧边栏的激活机制
+
+> 2. 相同大模块下 *相同的二级菜单* 路由的，`meta`属性数组的`第二项`中的`url`，是统一的，用于侧边栏的激活机制

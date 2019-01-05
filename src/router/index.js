@@ -3,6 +3,9 @@ import Router from 'vue-router';
 import NProgress from 'nprogress' // progress bar
 import 'nprogress/nprogress.css'
 import Example from '@/router/example'
+import Commodity from '@/router/commodity'
+import Content from '@/router/content'
+import Logistics from '@/router/logistics'
 // progress bar style
 NProgress.configure({ showSpinner: false });
 
@@ -10,8 +13,13 @@ const Login = () => import('@/vuepage/login');
 const Index = () => import('@/vuepage/Index');
 const children = [{
   path: '',
-  redirect: '/example-management',
-}].concat(...Example)
+  redirect: '/example-management/multiple-download',
+}].concat(
+  ...Example,
+  ...Commodity,
+  ...Content,
+  ...Logistics,
+)
 console.log(Example)
 Vue.use(Router);
 

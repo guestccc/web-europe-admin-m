@@ -8,7 +8,7 @@
       :index="data.route"
     >
       <i :class="iconClass"/>
-      <span slot="title">{{ data.name }}</span>
+      <span slot="title">\{{ data.name }}</span>
     </el-menu-item>
   </div>
 </template>

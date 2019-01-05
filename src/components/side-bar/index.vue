@@ -2,7 +2,7 @@
   <el-row>
     <el-col>
       <el-menu
-        :default-active="$route.path"
+        :default-active="$route.meta[0].url+'/'+$route.meta[1].url"
         :router="routerMode"
         class="el-menu-vertical-demo full-height"
         background-color="#141414"

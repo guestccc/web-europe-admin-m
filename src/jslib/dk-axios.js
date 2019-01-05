@@ -3,23 +3,23 @@
  * Modified by Zhi on 2018/7/8.
  */
 import axios from 'axios';
-import utils from './dk-utils';
 
-import { domain } from './environment';
+import { apiDomain } from '@/configs/env';
 
+/* eslint-disable */
 const dkAxios = axios.create({
-  baseURL: domain,
-  timeout: 10000, //设置超时时间
+  baseURL: apiDomain,
+  timeout: 10000, // 设置超时时间
 });
 
 let loading;
 dkAxios.interceptors.request.use(
-  function(config) {
+  (config) => {
     // 访问网络时加载loading,防止用户多次操作
-    const token = utils.getCookie('projectName_token');
+    const token = sessionStorage.getItem('token')
 
     if (token) {
-      config.headers = { token: token };
+      config.headers = { 'X-Access-Token': token };
     }
 
     loading = vm.$loading({
@@ -31,20 +31,18 @@ dkAxios.interceptors.request.use(
 
     return config;
   },
-  function(error) {
-    // Do something with request error
-    return Promise.reject(error);
-  },
+  error => Promise.reject(error)
+  ,
 );
 
 dkAxios.interceptors.response.use(
-  function(response) {
+  (response) => {
     loading.close();
     return response;
   },
-  function(error) {
+  (error) => {
     loading.close();
-    let { status, data } = error.response;
+    const { status, data } = error.response;
 
     switch (status) {
       case 401:

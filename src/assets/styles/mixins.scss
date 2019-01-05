@@ -9,3 +9,19 @@
   -o-background-size: cover;
   background-size: cover;
 }
+
+@mixin dk-table-top{
+  display: flex;
+  .dk-select{
+    width: 120px;
+  }
+  div:nth-child(n){
+    margin-right: 10px;
+  }
+  div:last-child{
+    margin-left: auto;
+  }
+  .dk_input {
+    width: calc(180px + 56px);
+  }
+}
