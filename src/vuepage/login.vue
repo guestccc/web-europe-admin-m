@@ -168,6 +168,14 @@ export default {
             },
           ],
         },
+        {
+          name: '权限管理',
+          children: [
+            {
+              name: '管理员列表',
+            },
+          ],
+        },
       ],
       operationList: [{
         name: '样例管理',

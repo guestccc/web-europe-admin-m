@@ -1,6 +1,22 @@
 
 const list = [
   {
+    name: '管理员列表',
+    menuItem: {
+      name: '管理员列表',
+      iconClass: 'dk-icon-home',
+      route: '/system-management/admin-list',
+    },
+  },
+  {
+    name: '权限管理',
+    menuItem: {
+      name: '权限管理',
+      iconClass: 'dk-icon-home',
+      route: '/system-management',
+    },
+  },
+  {
     name: '兑换订单列表',
     menuItem: {
       name: '兑换订单列表',

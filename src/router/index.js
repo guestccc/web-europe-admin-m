@@ -8,6 +8,7 @@ import Content from '@/router/content'
 import Logistics from '@/router/logistics'
 import User from '@/router/user'
 import Order from '@/router/order'
+import System from '@/router/system'
 // progress bar style
 NProgress.configure({ showSpinner: false });
 
@@ -23,6 +24,7 @@ const children = [{
   ...Logistics,
   ...User,
   ...Order,
+  ...System,
 )
 console.log(Example)
 Vue.use(Router);

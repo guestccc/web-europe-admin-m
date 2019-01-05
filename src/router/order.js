@@ -1,7 +1,9 @@
 import OrderManagement from '@/vuepage/order/index';
 import OrderList from '../vuepage/order/list';
+// eslint-disable-next-line
 import OrderDetail from '../vuepage/order/detail';
 import OrderPointList from '../vuepage/order/point-list';
+// eslint-disable-next-line
 import OrderPointDetail from '../vuepage/order/detail';
 
 export default [
