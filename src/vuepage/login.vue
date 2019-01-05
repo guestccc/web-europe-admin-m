@@ -96,6 +96,17 @@ export default {
         //   ],
         // },
         {
+          name: '用户管理',
+          children: [
+            // {
+            //   name: '商品详情',
+            // },
+            {
+              name: '用户列表',
+            },
+          ],
+        },
+        {
           name: '商品管理',
           children: [
             // {
@@ -109,6 +120,20 @@ export default {
             },
             {
               name: '分类列表',
+            },
+          ],
+        },
+        {
+          name: '订单管理',
+          children: [
+            // {
+            //   name: '商品详情',
+            // },
+            {
+              name: '订单列表',
+            },
+            {
+              name: '兑换订单列表',
             },
           ],
         },

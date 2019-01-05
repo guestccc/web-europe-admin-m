@@ -1,6 +1,46 @@
 
 const list = [
   {
+    name: '兑换订单列表',
+    menuItem: {
+      name: '兑换订单列表',
+      iconClass: 'dk-icon-home',
+      route: '/order-management/point-list',
+    },
+  },
+  {
+    name: '订单列表',
+    menuItem: {
+      name: '订单列表',
+      iconClass: 'dk-icon-home',
+      route: '/order-management/list',
+    },
+  },
+  {
+    name: '订单管理',
+    menuItem: {
+      name: '订单管理',
+      iconClass: 'dk-icon-home',
+      route: '/order-management',
+    },
+  },
+  {
+    name: '用户列表',
+    menuItem: {
+      name: '用户列表',
+      iconClass: 'dk-icon-home',
+      route: '/user-management/list',
+    },
+  },
+  {
+    name: '用户管理',
+    menuItem: {
+      name: '用户管理',
+      iconClass: 'dk-icon-home',
+      route: '/user-management',
+    },
+  },
+  {
     name: '物流单列表',
     menuItem: {
       name: '物流单列表',
