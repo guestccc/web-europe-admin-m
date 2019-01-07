@@ -13,7 +13,7 @@
         <el-button
           type="primary"
           plain
-          @click="event().toAddOrEditClick({})">新建管理员</el-button>
+          @click="event().toAddOrEditClick({})">新建身份</el-button>
       </div>
     </div>
     <!-- 表格 -->
@@ -25,14 +25,10 @@
         label="编号"/>
       <el-table-column
         prop="priority"
-        label="管理员账号"/>
+        label="管理员身份"/>
       <el-table-column
         prop="name"
-        label="姓名"/>
-      <el-table-column
-        prop="banner_src"
-        label="管理员身份"
-        width="161"/>
+        label="管理模块"/>
       <el-table-column
         fixed="right"
         label="管理"
@@ -66,65 +62,6 @@
         layout="prev, pager, next"
         :total="total"/>
     </div>
-
-
-    <!-- 添加规格 -->
-    <el-dialog
-      :title="adminTitle"
-      width="480px"
-      :visible.sync="adminDialog">
-      <el-form
-        :model="admin"
-        label-position="left"
-        :rules="rules2"
-        ref="ruleForm2"
-        label-width="100px"
-        class="demo-ruleForm">
-        <el-form-item
-          label="管理员账号："
-          prop="name">
-          <el-input
-            class="dk-input"
-            v-model="admin.name"/>
-        </el-form-item>
-        <el-form-item
-          label="管理员姓名："
-          prop="name">
-          <el-input
-            class="dk-input"
-            v-model="admin.name"/>
-        </el-form-item>
-        <el-form-item
-          label="管理员密码："
-          prop="name">
-          <el-input
-            class="dk-input"
-            v-model="admin.name"/>
-        </el-form-item>
-        <el-form-item
-          label="管理员身份："
-          prop="name">
-          <el-select
-            v-model="admin.name"
-            clearable
-            placeholder="请选择">
-            <el-option
-              v-for="item in adminClass"
-              :key="item.uuid"
-              :label="item.name"
-              :value="item.uuid"/>
-          </el-select>
-        </el-form-item>
-      </el-form>
-      <div
-        slot="footer"
-        class="dialog-footer">
-        <el-button @click="updateDialog = false">取 消</el-button>
-        <el-button
-          type="primary"
-          @click="event().onStandardSureClick('ruleForm2')">确 定</el-button>
-      </div>
-    </el-dialog>
   </el-main>
 </template>
 
@@ -179,7 +116,7 @@ export default {
         },
         toAddOrEditClick: (row) => {
           sessionStorage.setItem('class', JSON.stringify(row))
-          this.$router.push({ path: 'commodity-class-add-frist', query: { uuid: row.uuid } })
+          this.$router.push({ path: 'add-class', query: { uuid: row.uuid } })
         },
         onDelClick: (uuid) => {
           this.handler().isDel(uuid)

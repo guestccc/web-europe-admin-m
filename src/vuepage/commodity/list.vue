@@ -195,8 +195,8 @@ export default {
         page_size: 20,
         first_cat: '',
         second_cat: '',
-        status: 1,
-        is_recommend: 0,
+        status: '',
+        is_recommend: '',
       },
       total: 0,
       fristCategory: [],
@@ -251,13 +251,14 @@ export default {
           if (status !== 200) return
           if (body) {
             this.secondCategory = data.list
-            this.body.second_cat = data.list[0].uuid
-            this.event().handleCurrentChange()
+            if (this.body.second_cat) {
+              this.event().handleCurrentChange()
+            }
             return
           }
           this.fristCategory = data.list
-          this.body.first_cat = data.list[0].uuid
-          this.event().onFristCategoryChange()
+          // this.body.first_cat = data.list[0].uuid
+          // this.event().onFristCategoryChange()
         },
         getCommodityList: async (body) => {
           const { status, data } = await getCommodityList(body)

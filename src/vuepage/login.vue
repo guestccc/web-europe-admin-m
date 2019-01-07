@@ -1,9 +1,9 @@
 <template>
   <div class="container">
     <div class="top">
-      <img
+      <!-- <img
         src="../assets/images/pic_logo1.png"
-        width="187px">
+        width="187px"> -->
     </div>
     <div class="main">
       <div class="login-box">
@@ -60,8 +60,8 @@
       </div>
     </div>
     <div class="foot">
-      <p>千色集团</p>
-      <p>服务电话：400-888-888</p>
+      <p>欧洲老店</p>
+      <!-- <p>服务电话：400-888-888</p> -->
     </div>
   </div>
 </template>
@@ -173,6 +173,12 @@ export default {
           children: [
             {
               name: '管理员列表',
+            },
+            {
+              name: '身份列表',
+            },
+            {
+              name: '操作日志',
             },
           ],
         },

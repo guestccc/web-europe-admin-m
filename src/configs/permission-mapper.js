@@ -1,6 +1,22 @@
 
 const list = [
   {
+    name: '操作日志',
+    menuItem: {
+      name: '操作日志',
+      iconClass: 'dk-icon-home',
+      route: '/system-management/log-list',
+    },
+  },
+  {
+    name: '身份列表',
+    menuItem: {
+      name: '身份列表',
+      iconClass: 'dk-icon-home',
+      route: '/system-management/admin-class',
+    },
+  },
+  {
     name: '管理员列表',
     menuItem: {
       name: '管理员列表',

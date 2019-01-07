@@ -6,7 +6,7 @@
         <div
           slot="trademark"
           class="title-box">
-          <img src="../assets/images/pic_logo2.png">
+          <!-- <img src="../assets/images/pic_logo2.png"> -->
           <!-- <span>DanKal后台管理</span> -->
         </div>
         <div slot="router">
