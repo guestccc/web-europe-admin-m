@@ -181,8 +181,7 @@
           </el-dialog>
         </el-form-item>
         <el-form-item
-          label="视频"
-          prop="video_src">
+          label="视频">
           <el-upload
             class="upload-demo"
             :action="uploadDomain"
@@ -421,9 +420,6 @@ export default {
         img_src: [
           { required: true, message: '请添加封面图', trigger: 'blur' },
         ],
-        video_src: [
-          { required: true, message: '请添加视频', trigger: 'blur' },
-        ],
         img_src_list: [
           { required: true, message: '请添加轮播图', trigger: 'blur' },
         ],
@@ -583,7 +579,7 @@ export default {
               this.body.add_standard = []
             })
           this.imglist = [{ response: { hash: data.img_src }, url: this.imgDomain + data.img_src }]
-          this.videoList = [{ response: { hash: data.video_src }, url: this.imgDomain + data.video_src }]
+          this.videoList = data.video_src ? [{ response: { hash: data.video_src }, url: this.imgDomain + data.video_src }]:[]
           this.detailList = [{ response: { hash: data.content }, url: this.imgDomain + data.content }]
           data.img_src_list.forEach((item) => {
             this.bannerList.push({ response: { hash: item }, url: this.imgDomain + item })
