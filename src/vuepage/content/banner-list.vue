@@ -5,7 +5,7 @@
         <el-button
           type="primary"
           plain
-          @click="event().toAddOrEditClick({})">新建轮播图</el-button>
+          @click="event().toAddOrEditClick()">新建轮播图</el-button>
       </div>
     </div>
     <!-- 表格 -->
@@ -13,23 +13,22 @@
       border
       :data="tableData">
       <el-table-column
-        prop="category_no"
+        prop="priority"
         label="排序"/>
       <el-table-column
-        prop="priority"
+        prop="name"
         label="轮播图名称"/>
       <el-table-column
-        prop="banner_src"
         label="轮播图"
         width="161">
         <template slot-scope="scope">
           <img
-            :src="imgDomain+'/'+scope.row.banner_src"
+            :src="imgDomain+'/'+scope.row.img_src"
             width="141px">
         </template>
       </el-table-column>
       <el-table-column
-        prop="name"
+        prop="url"
         label="跳转链接"/>
       <el-table-column
         fixed="right"
@@ -40,7 +39,7 @@
             size="mini"
             type="primary"
             class="mini-el-button"
-            @click="event().toAddOrEditClick(scope.row)">
+            @click="event().toAddOrEditClick(scope.row.uuid)">
             编 辑
           </el-button>
           <el-button
@@ -68,7 +67,7 @@
 </template>
 
 <script>
-import { GetFristCategory, delCategory } from '../../api/commodity'
+import { getBannerList, deleteBanner } from '../../api/content'
 import { imgDomain } from '../../configs/env'
 
 export default {
@@ -90,7 +89,7 @@ export default {
   components: {
   },
   created() {
-    this.network().GetFristCategory()
+    this.network().getBannerList()
   },
   methods: {
     handleCurrentChange() {
@@ -101,9 +100,8 @@ export default {
         toNextListClick: (uuid) => {
           this.$router.push({ path: 'commodity-class-next-list', query: { parent_uuid: uuid } })
         },
-        toAddOrEditClick: (row) => {
-          sessionStorage.setItem('class', JSON.stringify(row))
-          this.$router.push({ path: 'banner-add', query: { uuid: row.uuid } })
+        toAddOrEditClick: (uuid) => {
+          this.$router.push({ path: 'banner-add', query: { uuid } })
         },
         onDelClick: (uuid) => {
           this.handler().isDel(uuid)
@@ -112,19 +110,19 @@ export default {
     },
     network() {
       return {
-        GetFristCategory: async () => {
-          const { status, data } = await GetFristCategory()
+        getBannerList: async () => {
+          const { status, data } = await getBannerList()
           if (status !== 200) return
           this.tableData = data.data
           this.total = data.total
         },
-        delCategory: async (uuid) => {
-          const { status } = await delCategory(uuid)
+        deleteBanner: async (uuid) => {
+          const { status } = await deleteBanner(uuid)
           if (status !== 200) return
-          this.network().GetFristCategory()
+          this.network().getBannerList()
           this.$notify({
             title: '删除成功',
-            message: '删除一级分类成功',
+            message: '删除轮播图成功',
             type: 'success',
           });
         },
@@ -133,12 +131,12 @@ export default {
     handler() {
       return {
         isDel: (uuid) => {
-          this.$confirm('确定删除分类, 是否继续?', '提示', {
+          this.$confirm('确定删除轮播图, 是否继续?', '提示', {
             confirmButtonText: '确定',
             cancelButtonText: '取消',
             type: 'warning',
           }).then(() => {
-            this.network().delCategory(uuid)
+            this.network().deleteBanner(uuid)
               .then(() => {
                 if (this.tableData.length === 1 && this.total > 10) {
                   this.body.page_index = this.body.page_index - 1

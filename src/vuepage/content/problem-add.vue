@@ -16,17 +16,17 @@
       </el-form-item>
       <el-form-item
         label="问题标题"
-        prop="category_no">
+        prop="title">
         <el-input
-          v-model="body.category_no"
+          v-model="body.title"
           autocomplete="off"/>
       </el-form-item>
       <div class="dk-form-item">
         <label class="el-form-item__label dk-label">问题回答</label>
         <dk-editor
           class="dk-li"
-          :content = "add.value.content"
-          :content-update.sync = "add.value.content"/>
+          :content = "body.content"
+          :content-update.sync = "body.content"/>
       </div>
       <el-form-item>
         <el-button
@@ -39,100 +39,40 @@
 </template>
 
 <script>
-import qiniu from '../../jslib/qiniu'
 import { uploadDomain } from '../../configs/env'
-import { addCategory, editCategory } from '../../api/commodity'
+import { getCommonQuestionDetail, editCommonQuestion, addCommonQuestion } from '../../api/content'
 import dkEditor from '../../components/quill-editor'
 
 export default {
-  mixins: [qiniu],
   components: {
     dkEditor,
   },
   data() {
     return {
-      add: {
-        value: { content: '' },
-      },
       uploadDomain,
-      imglist: [],
-      imglist2: [],
       body: {
-        parent_uuid: this.$route.query.parent_uuid,
         priority: '',
         name: '',
-        img_src: '',
-        banner_src: '',
-        category_no: '',
+        title: '',
       },
       rules2: {
-        category_no: [
-          { required: true, message: '请输入分类编号', trigger: 'blur' },
-        ],
-        name: [
-          { required: true, message: '请输入分类名称', trigger: 'blur' },
-        ],
         priority: [
           { required: true, message: '请输入排序', trigger: 'blur' },
         ],
-        banner_src: [
-          { required: true, message: '请输入图片', trigger: 'blur' },
+        title: [
+          { required: true, message: '请输入问题标题', trigger: 'blur' },
         ],
-        img_src: [
-          { required: true, message: '请输入图片', trigger: 'blur' },
+        content: [
+          { required: true, message: '请输入问题回答', trigger: 'blur' },
         ],
       },
     };
   },
   created() {
-    this.handler().getDetail()
+    if (!this.$route.query.uuid) return
+    this.network().getCommonQuestionDetail()
   },
   methods: {
-    // 覆盖element-ui的上传动作
-    onImageChange() {
-    },
-    // 限制上传图片数量
-    onImageLimited() {
-      this.$message.error('最多上传一张图片')
-    },
-    // 图片上传成功的回调
-    onImageUploadSuccess(response) {
-      this.imglist.push({
-        response: {
-          hash: response.hash,
-        }, // response里面的hash是必须的
-        url: this.imgDomain + response.hash, // url也是必须的
-      })
-      this.body.banner_src = response.hash
-    },
-    // 移除图片
-    removeImg(file, fileList) {
-      this.imglist = fileList // 剩下的文件
-      this.body.banner_src = fileList[0]
-    },
-
-    // 覆盖element-ui的上传动作
-    onImageChange2() {
-    },
-    // 限制上传图片数量
-    onImageLimited2() {
-      this.$message.error('最多上传一张图片')
-    },
-    // 图片上传成功的回调
-    onImageUploadSuccess2(response) {
-      this.imglist2.push({
-        response: {
-          hash: response.hash,
-        }, // response里面的hash是必须的
-        url: this.imgDomain + response.hash, // url也是必须的
-      })
-      this.body.img_src = response.hash
-    },
-    // 移除图片
-    removeImg2(file, fileList) {
-      this.imglist2 = fileList // 剩下的文件
-      this.body.img_src = fileList[0]
-    },
     event() {
       return {
         onBackClick: () => {
@@ -143,10 +83,10 @@ export default {
             if (valid) {
               // 调接口
               if (this.$route.query.uuid) {
-                this.network().editCategory()
+                this.network().editCommonQuestion()
                 return
               }
-              this.network().addCategory()
+              this.network().addCommonQuestion()
             } else {
               console.log('error submit!!');
             }
@@ -156,22 +96,29 @@ export default {
     },
     network() {
       return {
-        addCategory: async () => {
-          const { status } = await addCategory(this.body)
+        getCommonQuestionDetail: async () => {
+          const { status, data } = await getCommonQuestionDetail(this.$route.query.uuid)
+          if (status !== 200) return
+          this.body = data
+        },
+        addCommonQuestion: async () => {
+          if (!this.handler().verifyInput()) return
+          const { status } = await addCommonQuestion(this.body)
           if (status !== 200) return
           this.$notify({
             title: '新建成功',
-            message: '新建分类成功',
+            message: '新建常见问题成功',
             type: 'success',
           });
           this.$router.go(-1)
         },
-        editCategory: async () => {
-          const { status } = await editCategory(this.body)
+        editCommonQuestion: async () => {
+          if (!this.handler().verifyInput()) return
+          const { status } = await editCommonQuestion(this.body)
           if (status !== 200) return
           this.$notify({
             title: '编辑成功',
-            message: '编辑分类成功',
+            message: '编辑常见问题成功',
             type: 'success',
           });
           this.$router.go(-1)
@@ -180,25 +127,17 @@ export default {
     },
     handler() {
       return {
-        // 获取详情
-        getDetail: () => {
-          // 有uuid是编辑
-          if (this.$route.query.uuid) {
-            this.body = JSON.parse(sessionStorage.getItem('class'))
-            this.imglist.push({
-              response: {
-                hash: this.body.banner_src,
-              }, // response里面的hash是必须的
-              url: this.imgDomain + this.body.banner_src, // url也是必须的
+        verifyInput: () => {
+          if (!this.body.content) {
+            this.$message({
+              message: '请输入问题回答',
+              type: 'warning',
             })
-            this.imglist2.push({
-              response: {
-                hash: this.body.img_src,
-              }, // response里面的hash是必须的
-              url: this.imgDomain + this.body.img_src, // url也是必须的
-            })
+            return false
           }
+          return true
         },
+
       }
     },
   },

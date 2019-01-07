@@ -5,7 +5,7 @@
         <el-button
           type="primary"
           plain
-          @click="event().toAddOrEditClick({})">新建轮播图</el-button>
+          @click="event().toAddOrEditClick()">新建轮播图</el-button>
       </div>
     </div>
     <!-- 表格 -->
@@ -13,10 +13,10 @@
       border
       :data="tableData">
       <el-table-column
-        prop="category_no"
+        prop="priority"
         label="排序"/>
       <el-table-column
-        prop="priority"
+        prop="title"
         label="问题标题"/>
       <el-table-column
         fixed="right"
@@ -27,7 +27,7 @@
             size="mini"
             type="primary"
             class="mini-el-button"
-            @click="event().toAddOrEditClick(scope.row)">
+            @click="event().toAddOrEditClick(scope.row.uuid)">
             编 辑
           </el-button>
           <el-button
@@ -55,7 +55,7 @@
 </template>
 
 <script>
-import { GetFristCategory, delCategory } from '../../api/commodity'
+import { getCommonQuestionList, deleteCommonQuestion } from '../../api/content'
 import { imgDomain } from '../../configs/env'
 
 export default {
@@ -77,7 +77,7 @@ export default {
   components: {
   },
   created() {
-    this.network().GetFristCategory()
+    this.network().getCommonQuestionList()
   },
   methods: {
     handleCurrentChange() {
@@ -88,9 +88,8 @@ export default {
         toNextListClick: (uuid) => {
           this.$router.push({ path: 'commodity-class-next-list', query: { parent_uuid: uuid } })
         },
-        toAddOrEditClick: (row) => {
-          sessionStorage.setItem('class', JSON.stringify(row))
-          this.$router.push({ path: 'problem-add', query: { uuid: row.uuid } })
+        toAddOrEditClick: (uuid) => {
+          this.$router.push({ path: 'problem-add', query: { uuid } })
         },
         onDelClick: (uuid) => {
           this.handler().isDel(uuid)
@@ -99,16 +98,16 @@ export default {
     },
     network() {
       return {
-        GetFristCategory: async () => {
-          const { status, data } = await GetFristCategory()
+        getCommonQuestionList: async () => {
+          const { status, data } = await getCommonQuestionList()
           if (status !== 200) return
           this.tableData = data.data
           this.total = data.total
         },
-        delCategory: async (uuid) => {
-          const { status } = await delCategory(uuid)
+        deleteCommonQuestion: async (uuid) => {
+          const { status } = await deleteCommonQuestion(uuid)
           if (status !== 200) return
-          this.network().GetFristCategory()
+          this.network().getCommonQuestionList()
           this.$notify({
             title: '删除成功',
             message: '删除一级分类成功',
@@ -120,12 +119,12 @@ export default {
     handler() {
       return {
         isDel: (uuid) => {
-          this.$confirm('确定删除分类, 是否继续?', '提示', {
+          this.$confirm('确定删除, 是否继续?', '提示', {
             confirmButtonText: '确定',
             cancelButtonText: '取消',
             type: 'warning',
           }).then(() => {
-            this.network().delCategory(uuid)
+            this.network().deleteCommonQuestion(uuid)
               .then(() => {
                 if (this.tableData.length === 1 && this.total > 10) {
                   this.body.page_index = this.body.page_index - 1

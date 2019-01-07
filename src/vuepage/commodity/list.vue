@@ -37,7 +37,7 @@
       </el-select>
       <el-select
         class="dk-select"
-        v-model="body.is_recommend"
+        v-model="body.is_recomend"
         clearable
         @change="event().handleCurrentChange()">
         <el-option
@@ -122,7 +122,7 @@
         width="110">
         <template slot-scope="scope">
           <el-switch
-            v-model="scope.row.is_recommend"
+            v-model="scope.row.is_recomend"
             active-color="#13ce66"
             inactive-color="#ff4949"
             :active-value="1"
@@ -196,7 +196,7 @@ export default {
         first_cat: '',
         second_cat: '',
         status: '',
-        is_recommend: '',
+        is_recomend: '',
       },
       total: 0,
       fristCategory: [],
@@ -213,6 +213,7 @@ export default {
   },
   created() {
     this.network().getCategory()
+    this.network().getCommodityList(this.body)
   },
   methods: {
     event() {
@@ -233,8 +234,8 @@ export default {
         onStatusChange: ({ uuid, status }) => {
           this.network().setStatus({ uuid, status })
         },
-        onRecommedationChange: ({ uuid, is_recommend }) => {
-          this.network().setRecommendation({ uuid, is_recommend })
+        onRecommedationChange: ({ uuid, is_recomend }) => {
+          this.network().setRecommendation({ uuid, is_recomend })
         },
         onDelClick: (uuid) => {
           this.handler().isDel(uuid)

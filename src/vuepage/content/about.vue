@@ -17,7 +17,7 @@
 
 <script>
 import dkEditor from '../../components/quill-editor'
-// import { addAbout, getAbout } from '../../api/content'
+import { addAbout, getAbout } from '../../api/content'
 
 export default {
   data() {
@@ -28,13 +28,13 @@ export default {
     };
   },
   created() {
-    // this.network().getAbout()
+    this.network().getAbout()
   },
   methods: {
     event() {
       return {
         onSureClick: () => {
-          this.network().addAbout(this.add.value)
+          this.network().addAbout(this.add)
         },
       }
     },
@@ -54,7 +54,7 @@ export default {
         getAbout: async () => {
           const { status, data } = await getAbout()
           if (status !== 200) return
-          this.add.value = data
+          this.add = data
         },
       }
     },

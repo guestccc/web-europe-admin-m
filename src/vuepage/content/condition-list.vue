@@ -5,7 +5,7 @@
       border
       :data="conditionTable">
       <el-table-column
-        prop="priority"
+        prop="money"
         label="下单限制金额"/>
       <el-table-column
         fixed="right"
@@ -27,10 +27,9 @@
       border
       :data="pointTable">
       <el-table-column
-        prop="priority"
         label="获得积分比例">
         <template slot-scope="scope">
-          <span>{{ scope.$index?'购买获得':'推荐获得' }}</span>
+          <span>{{ scope.row.proportion?`购买获得${scope.row.proportion}`:`推荐获得${scope.row.recommend}` }}</span>
         </template>
       </el-table-column>
       <el-table-column
@@ -83,31 +82,31 @@
 </template>
 
 <script>
+import { getConfig } from '../../api/content'
 
 export default {
   data() {
     return {
       conditionTitle: false,
-      conditionDialog: true,
+      conditionDialog: false,
       body: {
         money: '',
       },
       conditionTable: [
         {
-
+          money: 0,
         },
       ],
       pointTable: [
         {
-
-        },
-        {
-
+          proportion: 0,
         },
       ],
     };
   },
   created() {
+    this.network().getConfig({ key: 'order_limit' })
+    this.network().getConfigPoint({ key: 'point_proportion' })
   },
   methods: {
     event() {
@@ -116,6 +115,22 @@ export default {
     },
     network() {
       return {
+        getConfig: async (body) => {
+          const { status, data } = await getConfig(body)
+          if (status !== 200) return
+          this.conditionTable = [data.value]
+        },
+        getConfigPoint: async (body) => {
+          const { status, data } = await getConfig(body)
+          if (status !== 200) return
+          this.pointTable = [data.value]
+          this.network().getConfigPoint2({ key: 'point_recommend' })
+        },
+        getConfigPoint2: async (body) => {
+          const { status, data } = await getConfig(body)
+          if (status !== 200) return
+          this.pointTable.push(data.value)
+        },
       }
     },
     handler() {

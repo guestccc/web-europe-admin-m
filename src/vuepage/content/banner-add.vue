@@ -12,13 +12,16 @@
       <el-form-item
         label="排序"
         prop="priority">
-        <el-input v-model.number="body.priority"/>
+        <el-input-number
+          v-model="body.priority"
+          :controls='false'
+          :min="1"/>
       </el-form-item>
       <el-form-item
         label="跳转链接"
-        prop="category_no">
+        prop="url">
         <el-input
-          v-model="body.category_no"
+          v-model="body.url"
           autocomplete="off"/>
       </el-form-item>
       <el-form-item
@@ -29,7 +32,7 @@
       </el-form-item>
       <el-form-item
         label="轮播图"
-        prop="banner_src">
+        prop="img_src">
         <el-upload
           @http-request="onImageChange"
           :action="uploadDomain"
@@ -38,6 +41,7 @@
           :file-list="imglist"
           :on-success="onImageUploadSuccess"
           :on-remove="removeImg"
+          :on-preview="handlePictureCardPreview"
           :on-exceed="onImageLimited"
           :data="uploadData"
           list-type="picture-card"
@@ -59,7 +63,7 @@
 <script>
 import qiniu from '../../jslib/qiniu'
 import { uploadDomain } from '../../configs/env'
-import { addCategory, editCategory } from '../../api/commodity'
+import { addBanner, editBanner, getBannerDetail } from '../../api/content'
 
 export default {
   mixins: [qiniu],
@@ -67,36 +71,34 @@ export default {
     return {
       uploadDomain,
       imglist: [],
-      imglist2: [],
+      dialogImageUrl: '',
+      dialogVisible: false,
       body: {
         parent_uuid: this.$route.query.parent_uuid,
         priority: '',
         name: '',
         img_src: '',
-        banner_src: '',
-        category_no: '',
+        url: '',
       },
       rules2: {
-        category_no: [
-          { required: true, message: '请输入分类编号', trigger: 'blur' },
+        url: [
+          { required: true, message: '请输入跳转链接', trigger: 'blur' },
         ],
         name: [
-          { required: true, message: '请输入分类名称', trigger: 'blur' },
+          { required: true, message: '请输入轮播图名称', trigger: 'blur' },
         ],
         priority: [
           { required: true, message: '请输入排序', trigger: 'blur' },
         ],
-        banner_src: [
-          { required: true, message: '请输入图片', trigger: 'blur' },
-        ],
         img_src: [
-          { required: true, message: '请输入图片', trigger: 'blur' },
+          { required: true, message: '请输入轮播', trigger: 'blur' },
         ],
       },
     };
   },
   created() {
-    this.handler().getDetail()
+    if (!this.$route.query.uuid) return
+    this.network().getBannerDetail()
   },
   methods: {
     // 覆盖element-ui的上传动作
@@ -114,34 +116,17 @@ export default {
         }, // response里面的hash是必须的
         url: this.imgDomain + response.hash, // url也是必须的
       })
-      this.body.banner_src = response.hash
+      this.body.img_src = response.hash
+    },
+    // 放大
+    handlePictureCardPreview(file) {
+      this.dialogImageUrl = file.url;
+      this.dialogVisible = true;
     },
     // 移除图片
     removeImg(file, fileList) {
       this.imglist = fileList // 剩下的文件
-      this.body.banner_src = fileList[0]
-    },
-
-    // 覆盖element-ui的上传动作
-    onImageChange2() {
-    },
-    // 限制上传图片数量
-    onImageLimited2() {
-      this.$message.error('最多上传一张图片')
-    },
-    // 图片上传成功的回调
-    onImageUploadSuccess2(response) {
-      this.imglist2.push({
-        response: {
-          hash: response.hash,
-        }, // response里面的hash是必须的
-        url: this.imgDomain + response.hash, // url也是必须的
-      })
-      this.body.img_src = response.hash
-    },
-    // 移除图片
-    removeImg2(file, fileList) {
-      this.imglist2 = fileList // 剩下的文件
+      // eslint-disable-next-line
       this.body.img_src = fileList[0]
     },
     event() {
@@ -154,10 +139,10 @@ export default {
             if (valid) {
               // 调接口
               if (this.$route.query.uuid) {
-                this.network().editCategory()
+                this.network().editBanner()
                 return
               }
-              this.network().addCategory()
+              this.network().addBanner()
             } else {
               console.log('error submit!!');
             }
@@ -167,22 +152,33 @@ export default {
     },
     network() {
       return {
-        addCategory: async () => {
-          const { status } = await addCategory(this.body)
+        getBannerDetail: async () => {
+          const { status, data } = await getBannerDetail(this.$route.query.uuid)
+          if (status !== 200) return
+          this.body = data
+          this.imglist.push({
+            response: {
+              hash: data.img_src,
+            }, // response里面的hash是必须的
+            url: this.imgDomain + data.img_src, // url也是必须的
+          })
+        },
+        addBanner: async () => {
+          const { status } = await addBanner(this.body)
           if (status !== 200) return
           this.$notify({
             title: '新建成功',
-            message: '新建分类成功',
+            message: '新建轮播成功',
             type: 'success',
           });
           this.$router.go(-1)
         },
-        editCategory: async () => {
-          const { status } = await editCategory(this.body)
+        editBanner: async () => {
+          const { status } = await editBanner(this.body)
           if (status !== 200) return
           this.$notify({
             title: '编辑成功',
-            message: '编辑分类成功',
+            message: '编辑轮播成功',
             type: 'success',
           });
           this.$router.go(-1)
@@ -191,25 +187,6 @@ export default {
     },
     handler() {
       return {
-        // 获取详情
-        getDetail: () => {
-          // 有uuid是编辑
-          if (this.$route.query.uuid) {
-            this.body = JSON.parse(sessionStorage.getItem('class'))
-            this.imglist.push({
-              response: {
-                hash: this.body.banner_src,
-              }, // response里面的hash是必须的
-              url: this.imgDomain + this.body.banner_src, // url也是必须的
-            })
-            this.imglist2.push({
-              response: {
-                hash: this.body.img_src,
-              }, // response里面的hash是必须的
-              url: this.imgDomain + this.body.img_src, // url也是必须的
-            })
-          }
-        },
       }
     },
   },

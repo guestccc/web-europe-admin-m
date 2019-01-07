@@ -184,19 +184,29 @@
           label="视频"
           prop="video_src">
           <el-upload
+            class="upload-demo"
             :action="uploadDomain"
-            :multiple="false"
+            :on-change="handleChange"
             :limit="1"
-            :file-list="videoList"
-            :on-success="onImageUploadSuccessVideo"
             :on-remove="removeImgVideo"
+            :before-upload="beforeAvatarUpload"
+            :on-success="onImageUploadSuccessVideo"
             :on-exceed="onImageLimitedVideo"
             :data="uploadData"
-            :before-upload="beforeAvatarUploadVideo"
-            list-type="picture-card"
-            style="display:inline-block">
-            <i class="el-icon-plus"/>
+            :file-list="videoList">
+            <el-button
+              size="small"
+              type="primary">点击上传</el-button>
+            <div
+              slot="tip"
+              class="el-upload__tip">只能上传mp4文件，且不超过2mb</div>
           </el-upload>
+          <video
+            width="148px"
+            height="148px"
+            controls
+            v-if="videoList.length"
+            :src="videoList[0].url"/>
         </el-form-item>
         <el-form-item
           label="轮播图"
@@ -333,7 +343,6 @@
 </template>
 
 <script>
-import { log } from 'util';
 import {
   getCategory, addCommodity, editCommodity, getCommodityDetail,
 } from '../../api/commodity'
@@ -493,7 +502,9 @@ export default {
               [this.body.standard[index].uuid],
               this.body.delete_standard ? this.body.delete_standard : [],
             )
-            this.body.standard = this.body.standard.filter(item => item.uuid !== this.body.standard[index].uuid)
+            this.body.standard = this.body.standard.filter(
+              item => item.uuid !== this.body.standard[index].uuid,
+            )
           }
         },
       }
@@ -597,7 +608,7 @@ export default {
     beforeAvatarUpload(file) {
       const isLt2M = file.size / 1024 / 1024 < 2;
       if (!isLt2M) {
-        this.$message.error('上传头像图片大小不能超过 2MB!');
+        this.$message.error('上传图片大小不能超过 2MB!');
       }
       return isLt2M;
     },
@@ -612,16 +623,24 @@ export default {
     },
     removeImg(file, fileList) {
       this.imglist = fileList // 剩下的文件
+      // eslint-disable-next-line
       this.body.img_src = fileList[0]
     },
     // 视频
     onImageLimitedVideo() {
       this.$message.error('最多上传一张图片')
     },
+    handleChange(file, fileList) {
+      this.videoList = fileList.slice(-3);
+    },
     beforeAvatarUploadVideo(file) {
+      const isJPG = file.type === 'mp4';
       const isLt2M = file.size / 1024 / 1024 < 2;
+      if (!isJPG) {
+        this.$message.error('上传视频只能是mp4格式!');
+      }
       if (!isLt2M) {
-        this.$message.error('上传头像图片大小不能超过 2MB!');
+        this.$message.error('上传视频大小不能超过 2MB!');
       }
       return isLt2M;
     },
@@ -636,6 +655,7 @@ export default {
     },
     removeImgVideo(file, fileList) {
       this.videoList = fileList // 剩下的文件
+      // eslint-disable-next-line
       this.body.video_src = fileList[0]
     },
     // 轮播图
@@ -662,7 +682,7 @@ export default {
     beforeAvatarUploadDetail(file) {
       const isLt2M = file.size / 1024 / 1024 < 2;
       if (!isLt2M) {
-        this.$message.error('上传头像图片大小不能超过 2MB!');
+        this.$message.error('上传图片大小不能超过 2MB!');
       }
       return isLt2M;
     },
@@ -677,6 +697,7 @@ export default {
     },
     removeImgDetail(file, fileList) {
       this.detailList = fileList // 剩下的文件
+      // eslint-disable-next-line
       this.body.content = fileList[0]
     },
     // 规格图
@@ -694,6 +715,7 @@ export default {
     },
     removeImgStandard(file, fileList) {
       this.standardImgList = fileList // 剩下的文件
+      // eslint-disable-next-line
       this.standard.img_src = fileList[0]
     },
   },

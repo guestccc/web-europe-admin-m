@@ -5,7 +5,7 @@
         <el-button
           type="primary"
           plain
-          @click="event().onAddOrEditClick({})">新建热门搜索</el-button>
+          @click="event().onAddOrEditClick()">新建热门搜索</el-button>
       </div>
     </div>
     <!-- 表格 -->
@@ -13,10 +13,10 @@
       border
       :data="tableData">
       <el-table-column
-        prop="category_no"
+        prop="priority"
         label="排序"/>
       <el-table-column
-        prop="priority"
+        prop="key"
         label="热门搜索词"/>
       <el-table-column
         fixed="right"
@@ -27,7 +27,7 @@
             size="mini"
             type="primary"
             class="mini-el-button"
-            @click="event().onAddOrEditClick(scope.row)">
+            @click="event().onAddOrEditClick(scope.row.uuid)">
             编 辑
           </el-button>
           <el-button
@@ -59,7 +59,7 @@
       width="480px"
       :visible.sync="hotDialog">
       <el-form
-        :model="standard"
+        :model="addBogy"
         label-position="left"
         :rules="rules2"
         ref="ruleForm2"
@@ -74,10 +74,10 @@
         </el-form-item>
         <el-form-item
           label="热门搜索词"
-          prop="name">
+          prop="key">
           <el-input
             class="dk-input"
-            v-model="addBogy.name"/>
+            v-model="addBogy.key"/>
         </el-form-item>
       </el-form>
       <div
@@ -86,25 +86,27 @@
         <el-button @click="hotDialog = false">取 消</el-button>
         <el-button
           type="primary"
-          @click="event().onStandardSureClick('ruleForm2')">确 定</el-button>
+          @click="event().onSureClick('ruleForm2')">确 定</el-button>
       </div>
     </el-dialog>
   </el-main>
 </template>
 
 <script>
-import { GetFristCategory, delCategory } from '../../api/commodity'
+import {
+  getSearchKeyList, deleteSearchKey, getSearchKeyDetail, addSearchKey, editSearchKey,
+} from '../../api/content'
 import { imgDomain } from '../../configs/env'
 
 export default {
   data() {
     return {
       imgDomain,
-      hotTitle: '新增',
+      hotTitle: '新增热门搜索',
       hotDialog: false,
       addBogy: {
         priority: '',
-        name: '',
+        key: '',
       },
       body: {
         keyWord: '',
@@ -113,27 +115,54 @@ export default {
       },
       total: 0,
       tableData: [
-        {},
       ],
+      rules2: {
+        priority: [
+          { required: true, message: '请输入排序', trigger: 'blur' },
+        ],
+        key: [
+          { required: true, message: '请输入热门搜索词', trigger: 'blur' },
+        ],
+      },
     };
   },
 
   components: {
   },
   created() {
-    this.network().GetFristCategory()
+    this.network().getSearchKeyList()
   },
   methods: {
     handleCurrentChange() {
-
+      this.network().getSearchKeyList()
     },
     event() {
       return {
-        toNextListClick: (uuid) => {
-          this.$router.push({ path: 'commodity-class-next-list', query: { parent_uuid: uuid } })
-        },
-        onAddOrEditClick: () => {
+        onAddOrEditClick: (uuid) => {
+          this.addBogy = {
+            priority: '',
+            key: '',
+          }
+          if (uuid) {
+            this.hotTitle = '编辑热门搜索'
+            this.network().getSearchKeyDetail(uuid)
+          }
+          this.hotTitle = '新增热门搜索'
           this.hotDialog = true
+        },
+        onSureClick: (formName) => {
+          this.$refs[formName].validate((valid) => {
+            if (valid) {
+              // 调接口
+              if (this.body.uuid) {
+                this.network().editSearchKey()
+                return
+              }
+              this.network().addSearchKey()
+            } else {
+              console.log('error submit!!');
+            }
+          });
         },
         onDelClick: (uuid) => {
           this.handler().isDel(uuid)
@@ -142,16 +171,43 @@ export default {
     },
     network() {
       return {
-        GetFristCategory: async () => {
-          const { status, data } = await GetFristCategory()
+        getSearchKeyList: async (body) => {
+          const { status, data } = await getSearchKeyList(body)
           if (status !== 200) return
           this.tableData = data.data
           this.total = data.total
         },
-        delCategory: async (uuid) => {
-          const { status } = await delCategory(uuid)
+        getSearchKeyDetail: async (uuid) => {
+          const { status, data } = await getSearchKeyDetail(uuid)
           if (status !== 200) return
-          this.network().GetFristCategory()
+          this.addBogy = data
+        },
+        addSearchKey: async () => {
+          const { status } = await addSearchKey(this.addBogy)
+          if (status !== 200) return
+          this.$notify({
+            title: '新增成功',
+            message: '新增热门搜索成功',
+            type: 'success',
+          });
+          this.network().getSearchKeyList(this.body)
+          this.hotDialog = false
+        },
+        editSearchKey: async () => {
+          const { status } = await editSearchKey(this.addBogy)
+          if (status !== 200) return
+          this.$notify({
+            title: '编辑成功',
+            message: '编辑热门搜索成功',
+            type: 'success',
+          });
+          this.network().getSearchKeyList(this.body)
+          this.hotDialog = false
+        },
+        deleteSearchKey: async (uuid) => {
+          const { status } = await deleteSearchKey(uuid)
+          if (status !== 200) return
+          this.network().getSearchKeyList()
           this.$notify({
             title: '删除成功',
             message: '删除一级分类成功',
@@ -163,12 +219,12 @@ export default {
     handler() {
       return {
         isDel: (uuid) => {
-          this.$confirm('确定删除分类, 是否继续?', '提示', {
+          this.$confirm('确定删除热门搜索, 是否继续?', '提示', {
             confirmButtonText: '确定',
             cancelButtonText: '取消',
             type: 'warning',
           }).then(() => {
-            this.network().delCategory(uuid)
+            this.network().deleteSearchKey(uuid)
               .then(() => {
                 if (this.tableData.length === 1 && this.total > 10) {
                   this.body.page_index = this.body.page_index - 1
