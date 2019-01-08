@@ -2,11 +2,13 @@
   <el-main class="page-content-margin-unset">
     <div class="table-top dk-li">
       <el-input
-        placeholder="请输入分类名称进行搜索"
-        v-model="body.keyWord"
+        placeholder="请输入分类名称"
+        v-model="body.keyword"
+        clearable
         class="input-with-select dk_input">
         <el-button
           slot="append"
+          @click="handleCurrentChange"
           icon="el-icon-search"/>
       </el-input>
       <div>
@@ -101,7 +103,7 @@ export default {
     return {
       imgDomain,
       body: {
-        keyWord: '',
+        keyword: '',
         page_index: 1,
         page_size: 20,
       },
@@ -119,7 +121,7 @@ export default {
   },
   methods: {
     handleCurrentChange() {
-
+      this.network().GetFristCategory()
     },
     event() {
       return {
@@ -138,7 +140,7 @@ export default {
     network() {
       return {
         GetFristCategory: async () => {
-          const { status, data } = await GetFristCategory()
+          const { status, data } = await GetFristCategory(this.body)
           if (status !== 200) return
           this.tableData = data.data
           this.total = data.total

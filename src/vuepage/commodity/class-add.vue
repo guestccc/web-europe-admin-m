@@ -12,6 +12,10 @@
       <el-form-item
         label="分类编号"
         prop="category_no">
+        <el-input-number
+          v-model="body.priority"
+          :controls='false'
+          :min="1"/>
         <el-input
           v-model="body.category_no"
           autocomplete="off"/>

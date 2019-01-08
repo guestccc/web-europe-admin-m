@@ -188,7 +188,7 @@
             :on-change="handleChange"
             :limit="1"
             :on-remove="removeImgVideo"
-            :before-upload="beforeAvatarUpload"
+            :before-upload="beforeAvatarUploadVideo"
             :on-success="onImageUploadSuccessVideo"
             :on-exceed="onImageLimitedVideo"
             :data="uploadData"
@@ -579,7 +579,7 @@ export default {
               this.body.add_standard = []
             })
           this.imglist = [{ response: { hash: data.img_src }, url: this.imgDomain + data.img_src }]
-          this.videoList = data.video_src ? [{ response: { hash: data.video_src }, url: this.imgDomain + data.video_src }]:[]
+          this.videoList = data.video_src ? [{ response: { hash: data.video_src }, url: this.imgDomain + data.video_src }] : []
           this.detailList = [{ response: { hash: data.content }, url: this.imgDomain + data.content }]
           data.img_src_list.forEach((item) => {
             this.bannerList.push({ response: { hash: item }, url: this.imgDomain + item })
@@ -631,14 +631,14 @@ export default {
     },
     beforeAvatarUploadVideo(file) {
       const isJPG = file.type === 'mp4';
-      const isLt2M = file.size / 1024 / 1024 < 2;
+      const isLt2M = file.size / 1024 / 1024 < 10;
       if (!isJPG) {
         this.$message.error('上传视频只能是mp4格式!');
       }
       if (!isLt2M) {
-        this.$message.error('上传视频大小不能超过 2MB!');
+        this.$message.error('上传视频大小不能超过 10MB!');
       }
-      return isLt2M;
+      return isLt2M && isJPG;
     },
     onImageUploadSuccessVideo(response) {
       this.videoList.push({

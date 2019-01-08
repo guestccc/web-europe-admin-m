@@ -16,7 +16,7 @@ const Login = () => import('@/vuepage/login');
 const Index = () => import('@/vuepage/Index');
 const children = [{
   path: '',
-  redirect: '/example-management/multiple-download',
+  redirect: '/user-management/list',
 }].concat(
   ...Example,
   ...Commodity,

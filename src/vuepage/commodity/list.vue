@@ -80,7 +80,7 @@
         prop="priority"
         label="排序"/>
       <el-table-column
-        prop="first_cat_name"
+        prop="title"
         label="商品标题"/>
       <el-table-column
         prop="first_cat_name"
