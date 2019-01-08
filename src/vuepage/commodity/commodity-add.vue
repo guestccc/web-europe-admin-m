@@ -630,7 +630,9 @@ export default {
       this.videoList = fileList.slice(-3);
     },
     beforeAvatarUploadVideo(file) {
-      const isJPG = file.type === 'mp4';
+      const isJPG = file.type === 'video/mp4';
+      console.log(file.type, '------------------');
+
       const isLt2M = file.size / 1024 / 1024 < 10;
       if (!isJPG) {
         this.$message.error('上传视频只能是mp4格式!');
