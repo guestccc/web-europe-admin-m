@@ -13,12 +13,9 @@
         label="分类编号"
         prop="category_no">
         <el-input-number
-          v-model="body.priority"
+          v-model="body.category_no"
           :controls='false'
           :min="1"/>
-        <el-input
-          v-model="body.category_no"
-          autocomplete="off"/>
       </el-form-item>
       <el-form-item
         label="分类名称"
@@ -29,7 +26,10 @@
       <el-form-item
         label="排序"
         prop="priority">
-        <el-input v-model.number="body.priority"/>
+        <el-input-number
+          v-model="body.priority"
+          :controls='false'
+          :min="1"/>
       </el-form-item>
       <el-form-item
         label="首页展示"
@@ -143,6 +143,7 @@ export default {
     // 移除图片
     removeImg(file, fileList) {
       this.imglist = fileList // 剩下的文件
+      // eslint-disable-next-line
       this.body.banner_src = fileList[0]
     },
 
@@ -166,6 +167,7 @@ export default {
     // 移除图片
     removeImg2(file, fileList) {
       this.imglist2 = fileList // 剩下的文件
+      // eslint-disable-next-line
       this.body.img_src = fileList[0]
     },
     event() {

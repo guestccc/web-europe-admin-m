@@ -3,14 +3,19 @@
     <div class="table-top dk-li">
       <el-input
         placeholder="请输入分类名称进行搜索"
-        v-model="body.keyWord"
+        v-model="body.keyword"
+        @change="handleCurrentChange()"
         class="input-with-select dk_input">
         <el-button
           slot="append"
+          @click="handleCurrentChange()"
           icon="el-icon-search"/>
       </el-input>
       <el-date-picker
         v-model="times"
+        clearable
+        value-format="yyyy-MM-dd"
+        @change="onTimeChange()"
         type="daterange"
         range-separator="至"
         start-placeholder="开始日期"
@@ -21,26 +26,26 @@
       border
       :data="tableData">
       <el-table-column
-        prop="category_no"
+        prop="idd"
         label="编号"/>
       <el-table-column
-        prop="img_src"
+        prop="avatar"
         label="头像"
         width="161">
         <template slot-scope="scope">
           <img
-            :src="imgDomain+'/'+scope.row.img_src"
+            :src="imgDomain+'/'+scope.row.avatar"
             width="141px">
         </template>
       </el-table-column>
       <el-table-column
-        prop="priority"
+        prop="name"
         label="用户昵称"/>
       <el-table-column
-        prop="name"
+        prop="mobile"
         label="手机号码"/>
       <el-table-column
-        prop="name"
+        prop="create_time"
         label="注册时间"/>
       <el-table-column
         fixed="right"
@@ -48,25 +53,35 @@
         width="330">
         <template slot-scope="scope">
           <el-button
+            v-if="scope.row.is_banned"
+            size="mini"
+            type="success"
+            class="mini-el-button"
+            plain
+            @click="event().onBandClick(scope.row)">
+            恢复
+          </el-button>
+          <el-button
+            v-else
             size="mini"
             type="danger"
             class="mini-el-button"
             plain
-            @click="event().onDelClick(scope.row.uuid)">
+            @click="event().onBandClick(scope.row)">
             禁用
           </el-button>
           <el-button
             size="mini"
             type="primary"
             class="mini-el-button"
-            @click="event().toDetailClick(scope.row)">
+            @click="event().toDetailClick(scope.row.uuid)">
             用户详情
           </el-button>
           <el-button
             size="mini"
             type="primary"
             class="mini-el-button"
-            @click="event().toOrderListClick(scope.row)">
+            @click="event().toOrderListClick(scope.row.uuid)">
             用户订单
           </el-button>
         </template>
@@ -86,17 +101,18 @@
 </template>
 
 <script>
-import { GetFristCategory, delCategory } from '../../api/commodity'
+import { getUserList, bandUser } from '../../api/user'
 import { imgDomain } from '../../configs/env'
-import commoonFunction from '../../jslib/common'
+import timeChange from '../../mixins/time-change'
+import { setId } from '../../jslib/set-id'
 
 export default {
-  mixins: [commoonFunction],
+  mixins: [timeChange],
   data() {
     return {
       imgDomain,
       body: {
-        keyWord: '',
+        keyword: '',
         page_index: 1,
         page_size: 20,
       },
@@ -111,11 +127,11 @@ export default {
   components: {
   },
   created() {
-    this.network().GetFristCategory({ parent_uuid: this.$route.query.parent_uuid })
+    this.network().getUserList()
   },
   methods: {
     handleCurrentChange() {
-
+      this.network().getUserList()
     },
     event() {
       return {
@@ -125,28 +141,26 @@ export default {
         toOrderListClick: (uuid) => {
           this.$router.push({ path: 'user-order-list', query: { uuid } })
         },
-        onDelClick: (uuid) => {
-          this.isDel('确定删除分类, 是否继续?', 'delCategory', uuid)
+        // eslint-disable-next-line
+        onBandClick: ({ uuid, is_banned }) => {
+          // eslint-disable-next-line
+          this.network().bandUser({ uuid, is_banned: is_banned ? 0 : 1 })
         },
       }
     },
     network() {
       return {
-        GetFristCategory: async (body) => {
-          const { status, data } = await GetFristCategory(body)
+        getUserList: async () => {
+          const { status, data } = await getUserList(this.body)
           if (status !== 200) return
+          this.tableData = setId(data.data, this.body.page_index, this.body.page_size)
           this.tableData = data.data
           this.total = data.total
         },
-        delCategory: async (uuid) => {
-          const { status } = await delCategory(uuid)
+        bandUser: async (body) => {
+          const { status } = await bandUser(body)
           if (status !== 200) return
-          this.network().GetFristCategory({ parent_uuid: this.$route.query.parent_uuid })
-          this.$notify({
-            title: '删除成功',
-            message: '删除二级分类成功',
-            type: 'success',
-          });
+          this.network().getUserList()
         },
       }
     },

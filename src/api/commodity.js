@@ -47,14 +47,14 @@ export const delCommoddity = data => dkAxios({
   method: 'DELETE',
 })
 
-// POST: 删除商品
+// POST: 上下架
 export const setStatus = data => dkAxios({
   url: '/cms/Product/statusToggle',
   method: 'POST',
   params: data,
 })
 
-// POST: 删除商品
+// POST: 推荐
 export const setRecommendation = data => dkAxios({
   url: '/cms/Product/setRecommendation',
   method: 'POST',
@@ -84,6 +84,50 @@ export const addCommodity = data => dkAxios({
 // POST: 编辑商品
 export const editCommodity = data => dkAxios({
   url: `/cms/Product/${data.uuid}`,
+  method: 'PUT',
+  data,
+})
+
+// 积分===================================
+
+
+// POST: 获取商品列表
+export const getPointProductList = data => dkAxios({
+  url: '/cms/PointProduct',
+  method: 'GET',
+  params: data,
+})
+
+// DELETE: 删除商品
+export const delPointProduct = data => dkAxios({
+  url: `/cms/PointProduct/${data}`,
+  method: 'DELETE',
+})
+
+// POST: 上下架
+export const setPointProductStatus = data => dkAxios({
+  url: '/cms/PointProduct/statusToggle',
+  method: 'POST',
+  params: data,
+})
+
+
+// POST：获取商品详情
+export const getPointProductDetail = data => dkAxios({
+  url: `/cms/PointProduct/${data}`,
+  method: 'GET',
+})
+
+// POST: 新增商品
+export const addPointProduct = data => dkAxios({
+  url: '/cms/PointProduct',
+  method: 'POST',
+  data,
+})
+
+// POST: 编辑商品
+export const editPointProduct = data => dkAxios({
+  url: `/cms/PointProduct/${data.uuid}`,
   method: 'PUT',
   data,
 })

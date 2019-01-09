@@ -16,7 +16,7 @@
             size="mini"
             type="primary"
             class="mini-el-button"
-            @click="event().onAddOrEditClick(scope.row,scope.$index)">
+            @click="event().onAddOrEditClick(scope.row)">
             编 辑
           </el-button>
         </template>
@@ -41,7 +41,7 @@
             size="mini"
             type="primary"
             class="mini-el-button"
-            @click="event().onAddOrEditClick(scope.row,scope.$index)">
+            @click="event().onAddOrEditClick(scope.row)">
             编 辑
           </el-button>
         </template>
@@ -58,39 +58,61 @@
         label-position="left"
         :rules="rules2"
         ref="ruleForm2"
-        label-width="120px"
+        label-width="180px"
         class="demo-ruleForm">
         <el-form-item
           label="下单限制金额：¥"
-          prop="priority">
-          <el-input
-            class="dk-input"
-            v-model="body.money"/>
-          <span>%</span>
+          prop="value"
+          v-if="body.key == 'order_limit'">
+          <el-input-number
+            v-model="body.value.money"
+            :controls='false'
+            :min="1"/>
+        </el-form-item>
+        <el-form-item
+          label="推荐人获得积分比例："
+          prop="value"
+          v-if="body.key == 'point_proportion'">
+          <el-input-number
+            v-model="body.value.proportion"
+            :controls='false'
+            :min="0.1"
+            :max="1"/>
+        </el-form-item>
+        <el-form-item
+          label="购买获得积分比例："
+          prop="value"
+          v-if="body.key == 'point_recommend'">
+          <el-input-number
+            v-model="body.value.recommend"
+            :controls='false'
+            :min="0.1"
+            :max="1"/>
         </el-form-item>
       </el-form>
       <div
         slot="footer"
         class="dialog-footer">
-        <el-button @click="levelDialog = false">取 消</el-button>
+        <el-button @click="conditionDialog = false">取 消</el-button>
         <el-button
           type="primary"
-          @click="event().onStandardSureClick('ruleForm2')">确 定</el-button>
+          @click="event().onSureClick('ruleForm2')">确 定</el-button>
       </div>
     </el-dialog>
   </el-main>
 </template>
 
 <script>
-import { getConfig } from '../../api/content'
+import { getConfig, setConfig } from '../../api/content'
 
 export default {
   data() {
     return {
-      conditionTitle: false,
+      conditionTitle: '编辑',
       conditionDialog: false,
       body: {
-        money: '',
+        value: {},
+        key: '',
       },
       conditionTable: [
         {
@@ -102,6 +124,11 @@ export default {
           proportion: 0,
         },
       ],
+      rules2: {
+        value: [
+          { required: true, message: '请输入内容', trigger: 'blur' },
+        ],
+      },
     };
   },
   created() {
@@ -111,6 +138,21 @@ export default {
   methods: {
     event() {
       return {
+        onAddOrEditClick: (item) => {
+          this.body.key = item.key
+          this.body.value[item.value] = item[item.value]
+          this.conditionDialog = true
+        },
+        onSureClick: (formName) => {
+          this.$refs[formName].validate((valid) => {
+            if (valid) {
+              // 调接口
+              this.network().setConfig(this.body)
+            } else {
+              console.log('error submit!!');
+            }
+          });
+        },
       }
     },
     network() {
@@ -118,18 +160,36 @@ export default {
         getConfig: async (body) => {
           const { status, data } = await getConfig(body)
           if (status !== 200) return
+          data.value.value = 'money'
+          data.value.key = 'order_limit'
           this.conditionTable = [data.value]
         },
         getConfigPoint: async (body) => {
           const { status, data } = await getConfig(body)
           if (status !== 200) return
+          data.value.value = 'proportion'
+          data.value.key = 'point_proportion'
           this.pointTable = [data.value]
           this.network().getConfigPoint2({ key: 'point_recommend' })
         },
         getConfigPoint2: async (body) => {
           const { status, data } = await getConfig(body)
           if (status !== 200) return
+          data.value.value = 'recommend'
+          data.value.key = 'point_recommend'
           this.pointTable.push(data.value)
+        },
+        setConfig: async (body) => {
+          const { status } = await setConfig(body)
+          if (status !== 200) return
+          this.$notify({
+            title: '编辑成功',
+            message: '编辑成功',
+            type: 'success',
+          });
+          this.network().getConfig({ key: 'order_limit' })
+          this.network().getConfigPoint({ key: 'point_proportion' })
+          this.conditionDialog = false
         },
       }
     },

@@ -97,8 +97,10 @@
 <script>
 import { GetFristCategory, delCategory } from '../../api/commodity'
 import { imgDomain } from '../../configs/env'
+import commoonFunction from '../../mixins/common'
 
 export default {
+  mixins: [commoonFunction],
   data() {
     return {
       imgDomain,
@@ -133,7 +135,7 @@ export default {
           this.$router.push({ path: 'commodity-class-add-frist', query: { uuid: row.uuid } })
         },
         onDelClick: (uuid) => {
-          this.handler().isDel(uuid)
+          this.isDel('确定删除分类, 是否继续?', 'delCategory', uuid)
         },
       }
     },
@@ -159,25 +161,6 @@ export default {
     },
     handler() {
       return {
-        isDel: (uuid) => {
-          this.$confirm('确定删除分类, 是否继续?', '提示', {
-            confirmButtonText: '确定',
-            cancelButtonText: '取消',
-            type: 'warning',
-          }).then(() => {
-            this.network().delCategory(uuid)
-              .then(() => {
-                if (this.tableData.length === 1 && this.total > 10) {
-                  this.body.page_index = this.body.page_index - 1
-                }
-              })
-          }).catch(() => {
-            this.$message({
-              type: 'info',
-              message: '已取消删除',
-            });
-          });
-        },
       }
     },
   },

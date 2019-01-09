@@ -234,6 +234,7 @@ export default {
         onStatusChange: ({ uuid, status }) => {
           this.network().setStatus({ uuid, status })
         },
+        // eslint-disable-next-line
         onRecommedationChange: ({ uuid, is_recomend }) => {
           this.network().setRecommendation({ uuid, is_recomend })
         },

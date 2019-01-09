@@ -26,7 +26,7 @@ export default [
             url: 'detail',
           },
           {
-            name: '用户详情',
+            name: '积分明细',
             url: 'point-detail',
           },
         ],

@@ -11,6 +11,7 @@
       </el-input>
       <span style="line-height: 40px;margin-right:10px">创建时间</span>
       <el-date-picker
+        style="width:240px"
         v-model="times"
         type="daterange"
         range-separator="至"
@@ -18,6 +19,7 @@
         end-placeholder="结束日期"/>
       <span style="line-height: 40px;margin-right:10px">兑换时间</span>
       <el-date-picker
+        style="width:240px"
         v-model="times"
         type="daterange"
         range-separator="至"
@@ -167,9 +169,9 @@
 </template>
 
 <script>
-import { GetFristCategory, delCategory } from '../../api/commodity'
+import { getOrderList } from '../../api/order'
 import { imgDomain } from '../../configs/env'
-import commoonFunction from '../../jslib/common'
+import commoonFunction from '../../mixins/common'
 
 export default {
   mixins: [commoonFunction],
@@ -220,7 +222,7 @@ export default {
   components: {
   },
   created() {
-    this.network().GetFristCategory({ parent_uuid: this.$route.query.parent_uuid })
+    this.network().getOrderList()
   },
   methods: {
     handleCurrentChange() {
@@ -231,15 +233,15 @@ export default {
         toDetailClick: (uuid) => {
           this.$router.push({ path: 'detail', query: { uuid } })
         },
-        onDeliveryClick: (uuid) => {
+        onDeliveryClick: () => {
           this.deliveryDialog = true
         },
       }
     },
     network() {
       return {
-        GetFristCategory: async (body) => {
-          const { status, data } = await GetFristCategory(body)
+        getOrderList: async () => {
+          const { status, data } = await getOrderList(this.body)
           if (status !== 200) return
           this.tableData = data.data
           this.total = data.total

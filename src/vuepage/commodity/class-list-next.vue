@@ -3,10 +3,13 @@
     <div class="table-top dk-li">
       <el-input
         placeholder="请输入分类名称进行搜索"
-        v-model="body.keyWord"
+        v-model="body.keyword"
+        clearable
+        @change="handleCurrentChange()"
         class="input-with-select dk_input">
         <el-button
           slot="append"
+          @click="handleCurrentChange()"
           icon="el-icon-search"/>
       </el-input>
       <div>
@@ -78,7 +81,7 @@
 <script>
 import { GetFristCategory, delCategory } from '../../api/commodity'
 import { imgDomain } from '../../configs/env'
-import commoonFunction from '../../jslib/common'
+import commoonFunction from '../../mixins/common'
 
 export default {
   mixins: [commoonFunction],
@@ -86,7 +89,8 @@ export default {
     return {
       imgDomain,
       body: {
-        keyWord: '',
+        parent_uuid: this.$route.query.parent_uuid,
+        keyword: '',
         page_index: 1,
         page_size: 20,
       },
@@ -100,11 +104,11 @@ export default {
   components: {
   },
   created() {
-    this.network().GetFristCategory({ parent_uuid: this.$route.query.parent_uuid })
+    this.network().GetFristCategory()
   },
   methods: {
     handleCurrentChange() {
-
+      this.network().GetFristCategory()
     },
     event() {
       return {
@@ -119,8 +123,8 @@ export default {
     },
     network() {
       return {
-        GetFristCategory: async (body) => {
-          const { status, data } = await GetFristCategory(body)
+        GetFristCategory: async () => {
+          const { status, data } = await GetFristCategory(this.body)
           if (status !== 200) return
           this.tableData = data.data
           this.total = data.total
@@ -128,7 +132,7 @@ export default {
         delCategory: async (uuid) => {
           const { status } = await delCategory(uuid)
           if (status !== 200) return
-          this.network().GetFristCategory({ parent_uuid: this.$route.query.parent_uuid })
+          this.network().GetFristCategory()
           this.$notify({
             title: '删除成功',
             message: '删除二级分类成功',

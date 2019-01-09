@@ -46,16 +46,13 @@
         prop="priority"
         label="排序"/>
       <el-table-column
-        prop="first_cat_name"
+        prop="title"
         label="商品标题"/>
       <el-table-column
-        prop="first_cat_name"
-        label="品牌"/>
-      <el-table-column
-        prop="second_cat_name"
+        prop="point"
         label="兑换积分数"/>
       <el-table-column
-        prop="second_cat_name"
+        prop="stock"
         label="库存"
         width="110"/>
       <el-table-column
@@ -110,17 +107,19 @@
 
 <script>
 import {
-  getCommodityList, getStandardList, delCommoddity, setStatus,
+  getPointProductList, delPointProduct, setPointProductStatus,
 } from '../../api/commodity'
+import commoonFunction from '../../mixins/common'
 
 export default {
+  mixins: [commoonFunction],
   data() {
     return {
       body: {
         keyword: '',
         page_index: 1,
         page_size: 20,
-        status: 1,
+        status: '',
         is_recommend: 0,
       },
       total: 0,
@@ -134,49 +133,47 @@ export default {
   components: {
   },
   created() {
+    this.network().getPointProductList()
   },
   methods: {
     event() {
       return {
-        toNextListClick: () => {
-          this.$router.push({ path: 'commodity-class-next-list' })
-        },
         toAddOrEditClick: (uuid) => {
-          this.$router.push({ path: 'commodity-add', query: { uuid } })
+          this.$router.push({ path: 'commodity-point-add', query: { uuid } })
         },
         onStatusChange: ({ uuid, status }) => {
-          this.network().setStatus({ uuid, status })
+          this.network().setPointProductStatus({ uuid, status })
         },
         onDelClick: (uuid) => {
-          this.handler().isDel(uuid)
+          this.isDel('确定删除商品, 是否继续?', 'delPointProduct', uuid)
         },
         handleCurrentChange: () => {
-          this.network().getCommodityList(this.body)
+          this.network().getPointProductList()
         },
       }
     },
     network() {
       return {
-        getCommodityList: async (body) => {
-          const { status, data } = await getCommodityList(body)
+        getPointProductList: async () => {
+          const { status, data } = await getPointProductList(this.body)
           if (status !== 200) return
           this.tableData = data.data
           this.total = data.total
         },
-        setStatus: async (body) => {
-          const { status } = await setStatus(body)
+        setPointProductStatus: async (body) => {
+          const { status } = await setPointProductStatus(body)
           if (status !== 200) return
           this.$notify({
             title: '操作成功',
             message: '上架/下架操作成功',
             type: 'success',
           });
-          this.network().getCommodityList(this.body)
+          this.network().getPointProductList()
         },
-        delCommoddity: async (uuid) => {
-          const { status } = await delCommoddity(uuid)
+        delPointProduct: async (uuid) => {
+          const { status } = await delPointProduct(uuid)
           if (status !== 200) return
-          this.network().getCommodityList(this.body)
+          this.network().getPointProductList()
           this.$notify({
             title: '删除成功',
             message: '删除积分商品成功',
@@ -187,25 +184,6 @@ export default {
     },
     handler() {
       return {
-        isDel: (uuid) => {
-          this.$confirm('确定删除商品, 是否继续?', '提示', {
-            confirmButtonText: '确定',
-            cancelButtonText: '取消',
-            type: 'warning',
-          }).then(() => {
-            this.network().delCommoddity(uuid)
-              .then(() => {
-                if (this.tableData.length === 1 && this.total > 10) {
-                  this.body.page_index = this.body.page_index - 1
-                }
-              })
-          }).catch(() => {
-            this.$message({
-              type: 'info',
-              message: '已取消删除',
-            });
-          });
-        },
       }
     },
   },

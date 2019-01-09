@@ -153,7 +153,7 @@
 <script>
 import { GetFristCategory, delCategory } from '../../api/commodity'
 import { imgDomain } from '../../configs/env'
-import commoonFunction from '../../jslib/common'
+import commoonFunction from '../../mixins/common'
 
 export default {
   mixins: [commoonFunction],
@@ -215,7 +215,7 @@ export default {
         toDetailClick: (uuid) => {
           this.$router.push({ path: 'point-detail', query: { uuid } })
         },
-        onDeliveryClick: (uuid) => {
+        onDeliveryClick: () => {
           this.deliveryDialog = true
         },
       }

@@ -98,3 +98,26 @@ export const getConfig = data => dkAxios({
   method: 'GET',
   params: data,
 })
+
+
+export const setConfig = data => dkAxios({
+  url: '/cms/Config/order_limit',
+  method: 'PUT',
+  data,
+})
+
+export const getFeedbackList = data => dkAxios({
+  url: '/cms/Feedback',
+  method: 'GET',
+  params: data,
+});
+
+export const getFeedbackDetail = data => dkAxios({
+  url: `/cms/Feedback/${data}`,
+  method: 'GET',
+});
+
+export const changeFeedback = data => dkAxios({
+  url: `/cms/Feedback/${data}`,
+  method: 'PUT',
+});

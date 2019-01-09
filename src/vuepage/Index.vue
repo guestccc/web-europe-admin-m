@@ -65,6 +65,13 @@ export default {
   },
   mounted() {
     this.menuList = pms2MenuList(this.permissionList)
+    console.log(this.menuList, '-------------------');
+
+    const newIndex = this.menuList[0] ? this.menuList[0].children[0].route : ''
+    if (this.$route.path !== '/user-management/list') return
+    this.$router.push({
+      path: newIndex,
+    });
   },
   methods: {
     event() {

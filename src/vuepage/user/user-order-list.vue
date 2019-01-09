@@ -1,31 +1,28 @@
 <template>
   <el-main class="page-content-margin-unset">
     <div class="table-top dk-li">
-      <el-input
-        placeholder="请输入分类名称进行搜索"
-        v-model="body.keyWord"
-        class="input-with-select dk_input">
-        <el-button
-          slot="append"
-          icon="el-icon-search"/>
-      </el-input>
       <el-date-picker
         v-model="times"
         type="daterange"
         range-separator="至"
+        clearable
+        value-format="yyyy-MM-dd"
+        @change="onTimeChange()"
         start-placeholder="开始日期"
         end-placeholder="结束日期"/>
       <el-select
-        v-model="value"
+        v-model="body.pay_type"
+        clearable
+        @change="handleCurrentChange()"
         placeholder="支付方式">
         <el-option
           label="支付宝"
-          value="1"/>
-        <el-option
-          label="微信"
           value="2"/>
         <el-option
-          label="线下"
+          label="微信"
+          value="1"/>
+        <el-option
+          label="线下支付"
           value="3"/>
       </el-select>
       <div/>
@@ -33,7 +30,7 @@
     <el-radio-group
       class="dk-li"
       v-model="body.status"
-      @change="event().onSearchChange()">
+      @change="handleCurrentChange()">
       <el-radio-button
         :label="item.value"
         v-for="(item,index) in orderArr"
@@ -44,31 +41,35 @@
       border
       :data="tableData">
       <el-table-column
-        prop="category_no"
+        prop="order_id"
         label="订单号"/>
       <el-table-column
-        prop="priority"
+        prop="create_time"
         label="创建时间"/>
       <el-table-column
         prop="name"
         label="用户昵称"/>
       <el-table-column
-        prop="name"
+        prop="mobile"
         label="手机号"/>
       <el-table-column
-        prop="name"
+        prop="money"
         label="订单金额"/>
       <el-table-column
-        prop="name"
-        label="支付方式"/>
+        prop="pay_type"
+        label="支付方式">
+        <template slot-scope="scope">
+          <span>{{ ['','微信','支付宝','线下支付'][scope.row.pay_type] }}</span>
+        </template>
+      </el-table-column>
       <el-table-column
-        prop="name"
+        prop="pay_time"
         label="支付时间"/>
       <el-table-column
-        prop="name"
+        prop="status"
         label="订单状态"/>
       <el-table-column
-        prop="name"
+        prop="invite_code"
         label="推荐人ID"/>
       <el-table-column
         fixed="right"
@@ -79,7 +80,7 @@
             size="mini"
             type="primary"
             class="mini-el-button"
-            @click="event().toDetailClick(scope.row)">
+            @click="event().toDetailClick(scope.row.uuid)">
             详情
           </el-button>
         </template>
@@ -99,90 +100,75 @@
 </template>
 
 <script>
-import { GetFristCategory, delCategory } from '../../api/commodity'
-import { imgDomain } from '../../configs/env'
-import commoonFunction from '../../jslib/common'
+import { getUserOrderList } from '../../api/user'
+import timeChange from '../../mixins/time-change'
 
 export default {
-  mixins: [commoonFunction],
+  mixins: [timeChange],
   data() {
     return {
-      imgDomain,
       orderArr: [
         {
           label: '全部',
-          value: 0,
+          value: '',
         },
         {
-          label: '待付款',
-          value: 1,
+          label: '待支付',
+          value: '待支付',
         },
         {
           label: '待发货',
-          value: 2,
+          value: '待发货',
         },
         {
           label: '待收货',
-          value: 3,
+          value: '待收货',
         },
         {
           label: '已完成',
-          value: 4,
+          value: '已完成',
         },
         {
           label: '已关闭',
-          value: 5,
+          value: '已关闭',
         },
       ],
       body: {
-        keyWord: '',
         page_index: 1,
         page_size: 20,
+        uuid: this.$route.query.uuid,
+        pay_type: '',
+        begin_time: '',
+        end_time: '',
+        status: '',
       },
       times: [],
       total: 0,
       tableData: [
-        {},
       ],
     };
   },
-
-  components: {
-  },
   created() {
-    this.network().GetFristCategory({ parent_uuid: this.$route.query.parent_uuid })
+    this.network().getUserOrderList()
   },
   methods: {
     handleCurrentChange() {
-
+      this.network().getUserOrderList()
     },
     event() {
       return {
         toDetailClick: (uuid) => {
           this.$router.push({ path: 'feedback-detail', query: { uuid } })
         },
-        onDelClick: (uuid) => {
-          this.isDel('确定删除分类, 是否继续?', 'delCategory', uuid)
-        },
       }
     },
     network() {
       return {
-        GetFristCategory: async (body) => {
-          const { status, data } = await GetFristCategory(body)
+        getUserOrderList: async () => {
+          const { status, data } = await getUserOrderList(this.body)
           if (status !== 200) return
           this.tableData = data.data
           this.total = data.total
-        },
-        delCategory: async (uuid) => {
-          const { status } = await delCategory(uuid)
-          if (status !== 200) return
-          this.network().GetFristCategory({ parent_uuid: this.$route.query.parent_uuid })
-          this.$notify({
-            title: '删除成功',
-            message: '删除二级分类成功',
-            type: 'success',
-          });
         },
       }
     },

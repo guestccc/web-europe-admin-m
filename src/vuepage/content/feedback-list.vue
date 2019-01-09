@@ -3,9 +3,12 @@
     <div class="table-top dk-li">
       <el-input
         placeholder="请输入分类名称进行搜索"
-        v-model="body.keyWord"
+        v-model="body.keyword"
+        clearable
+        @change="handleCurrentChange()"
         class="input-with-select dk_input">
         <el-button
+          @click="handleCurrentChange()"
           slot="append"
           icon="el-icon-search"/>
       </el-input>
@@ -14,18 +17,20 @@
         type="daterange"
         range-separator="至"
         start-placeholder="开始日期"
+        value-format="yyyy-MM-dd"
+        @change="onTimeChange()"
         end-placeholder="结束日期"/>
       <el-select
         class="dk-select"
-        v-model="body.status"
+        v-model="body.is_read"
         clearable
-        @change="event().handleCurrentChange()">
+        @change="handleCurrentChange()">
         <el-option
           label="已读"
-          :value="0"/>
+          :value="1"/>
         <el-option
           label="未读"
-          :value="1"/>
+          :value="0"/>
       </el-select>
     </div>
     <!-- 表格 -->
@@ -33,7 +38,7 @@
       border
       :data="tableData">
       <el-table-column
-        prop="category_no"
+        type="index"
         label="编号"/>
       <el-table-column
         prop="img_src"
@@ -41,22 +46,26 @@
         width="161">
         <template slot-scope="scope">
           <img
-            :src="imgDomain+'/'+scope.row.img_src"
+            :src="imgDomain+'/'+scope.row.avatar"
             width="141px">
         </template>
       </el-table-column>
       <el-table-column
-        prop="priority"
+        prop="username"
         label="用户昵称"/>
       <el-table-column
-        prop="name"
+        prop="mobile"
         label="手机号码"/>
       <el-table-column
-        prop="name"
+        prop="create_time"
         label="提交时间"/>
       <el-table-column
-        prop="name"
-        label="状态"/>
+        prop="is_read"
+        label="状态">
+        <template slot-scope="scope">
+          <span>{{ ['未读','已读'][scope.row.is_read] }}</span>
+        </template>
+      </el-table-column>
       <el-table-column
         fixed="right"
         label="管理"
@@ -66,7 +75,7 @@
             size="mini"
             type="primary"
             class="mini-el-button"
-            @click="event().toDetailClick(scope.row)">
+            @click="event().toDetailClick(scope.row.uuid)">
             查看详情
           </el-button>
           <el-button
@@ -74,7 +83,8 @@
             type="danger"
             class="mini-el-button"
             plain
-            @click="event().onDelClick(scope.row.uuid)">
+            v-if="!scope.row.is_read"
+            @click="event().onChangeReadClick(scope.row.uuid)">
             设为已读
           </el-button>
         </template>
@@ -94,24 +104,26 @@
 </template>
 
 <script>
-import { GetFristCategory, delCategory } from '../../api/commodity'
+import { getFeedbackList, changeFeedback } from '../../api/content'
 import { imgDomain } from '../../configs/env'
-import commoonFunction from '../../jslib/common'
+import timeChange from '../../mixins/time-change'
 
 export default {
-  mixins: [commoonFunction],
+  mixins: [timeChange],
   data() {
     return {
       imgDomain,
       body: {
-        keyWord: '',
+        keyword: '',
         page_index: 1,
         page_size: 20,
+        begin_time: '',
+        end_time: '',
+        is_read: '',
       },
       times: [],
       total: 0,
       tableData: [
-        {},
       ],
     };
   },
@@ -119,39 +131,39 @@ export default {
   components: {
   },
   created() {
-    this.network().GetFristCategory({ parent_uuid: this.$route.query.parent_uuid })
+    this.network().getFeedbackList()
   },
   methods: {
     handleCurrentChange() {
-
+      this.network().getFeedbackList()
     },
     event() {
       return {
         toDetailClick: (uuid) => {
           this.$router.push({ path: 'feedback-detail', query: { uuid } })
         },
-        onDelClick: (uuid) => {
-          this.isDel('确定删除分类, 是否继续?', 'delCategory', uuid)
+        onChangeReadClick: (uuid) => {
+          this.network().changeFeedback(uuid)
         },
       }
     },
     network() {
       return {
-        GetFristCategory: async (body) => {
-          const { status, data } = await GetFristCategory(body)
+        getFeedbackList: async () => {
+          const { status, data } = await getFeedbackList(this.body)
           if (status !== 200) return
           this.tableData = data.data
           this.total = data.total
         },
-        delCategory: async (uuid) => {
-          const { status } = await delCategory(uuid)
+        changeFeedback: async (uuid) => {
+          const { status } = await changeFeedback(uuid)
           if (status !== 200) return
-          this.network().GetFristCategory({ parent_uuid: this.$route.query.parent_uuid })
           this.$notify({
-            title: '删除成功',
-            message: '删除二级分类成功',
+            title: '设置成功',
+            message: '设置为已读成功',
             type: 'success',
           });
+          this.network().getFeedbackList()
         },
       }
     },
