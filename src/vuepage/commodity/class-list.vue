@@ -5,6 +5,7 @@
         placeholder="请输入分类名称"
         v-model="body.keyword"
         clearable
+        @click="handleCurrentChange"
         class="input-with-select dk_input">
         <el-button
           slot="append"

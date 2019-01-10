@@ -3,15 +3,21 @@
     <div class="table-top dk-li">
       <el-input
         placeholder="请输入用户昵称/手机号/订单号进行搜索"
-        v-model="body.keyWord"
+        v-model="body.keyword"
+        clearable
+        @change="handleCurrentChange()"
         class="input-with-select dk_input">
         <el-button
+          @click="handleCurrentChange()"
           slot="append"
           icon="el-icon-search"/>
       </el-input>
       <span style="line-height: 40px;margin-right:10px">创建时间</span>
       <el-date-picker
         style="width:240px"
+        clearable
+        value-format="yyyy-MM-dd"
+        @change="onTimeChange()"
         v-model="times"
         type="daterange"
         range-separator="至"
@@ -20,7 +26,10 @@
       <span style="line-height: 40px;margin-right:10px">兑换时间</span>
       <el-date-picker
         style="width:240px"
-        v-model="times"
+        clearable
+        value-format="yyyy-MM-dd"
+        @change="onTimeChange1()"
+        v-model="times1"
         type="daterange"
         range-separator="至"
         start-placeholder="开始日期"
@@ -31,7 +40,7 @@
         v-model="body.is_recommend"
         clearable
         placeholder="支付方式"
-        @change="event().handleCurrentChange()">
+        @change="handleCurrentChange()">
         <el-option
           label="支付宝"
           value="1"/>
@@ -52,7 +61,7 @@
     <el-radio-group
       class="dk-li"
       v-model="body.status"
-      @change="event().onSearchChange()">
+      @change="handleCurrentChange()">
       <el-radio-button
         :label="item.value"
         v-for="(item,index) in orderArr"
@@ -63,59 +72,62 @@
       border
       :data="tableData">
       <el-table-column
-        prop="category_no"
+        prop="order_id"
         label="订单号"/>
       <el-table-column
-        prop="priority"
+        prop="create_time"
         label="创建时间"/>
       <el-table-column
         prop="name"
         label="用户昵称"/>
       <el-table-column
-        prop="name"
+        prop="mobile"
         label="手机号"/>
       <el-table-column
-        prop="name"
+        prop="money"
         label="订单金额"/>
       <el-table-column
-        prop="name"
-        label="支付方式"/>
+        prop="pay_type"
+        label="支付方式">
+        <template slot-scope="scope">
+          <span>{{ ['','微信','支付宝','线下支付'][scope.row.pay_type] }}</span>
+        </template>
+      </el-table-column>
       <el-table-column
-        prop="name"
+        prop="pay_time"
         label="支付时间"/>
       <el-table-column
-        prop="name"
+        prop="status"
         label="订单状态"/>
       <el-table-column
-        prop="name"
+        prop="invite_code"
         label="推荐人ID"/>
       <el-table-column
         fixed="right"
         label="管理"
-        width="330">
+        width="440">
         <template slot-scope="scope">
           <el-button
             size="mini"
             type="primary"
             class="mini-el-button"
-            @click="event().toDetailClick(scope.row)">
+            @click="event().toDetailClick(scope.row.order_uuid)">
             详 情
           </el-button>
           <el-button
             size="mini"
             type="primary"
-            class="mini-el-button"
-            @click="event().toDetailClick(scope.row)">
+            class="mini-el-button">
             关闭订单
           </el-button>
           <el-button
             size="mini"
             type="primary"
-            class="mini-el-button"
-            @click="event().toDetailClick(scope.row)">
+            class="mini-el-button">
             确认到账
           </el-button>
           <el-button
+            v-if="scope.row.status == '待发货'"
             size="mini"
             type="primary"
             class="mini-el-button"
@@ -183,39 +195,59 @@ export default {
       orderArr: [
         {
           label: '全部',
-          value: 0,
+          value: '',
         },
         {
-          label: '待付款',
-          value: 1,
+          label: '待支付',
+          value: '待支付',
         },
         {
           label: '待发货',
-          value: 2,
+          value: '待发货',
         },
         {
           label: '待收货',
-          value: 3,
+          value: '待收货',
         },
         {
           label: '已完成',
-          value: 4,
+          value: '已完成',
         },
         {
           label: '已关闭',
-          value: 5,
+          value: '已关闭',
         },
       ],
       body: {
-        keyWord: '',
         page_index: 1,
         page_size: 20,
+        pay_type: '',
+        create_begin_time: '',
+        create_end_time: '',
+        pay_begin_time: '',
+        pay_end_time: '',
+        status: '',
+        keyword: '',
       },
       times: [],
+      times1: [],
       total: 0,
       tableData: [
-        {},
       ],
+      rules2: {
+        url: [
+          { required: true, message: '请输入跳转链接', trigger: 'blur' },
+        ],
+        name: [
+          { required: true, message: '请输入轮播图名称', trigger: 'blur' },
+        ],
+        priority: [
+          { required: true, message: '请输入排序', trigger: 'blur' },
+        ],
+        img_src: [
+          { required: true, message: '请输入轮播', trigger: 'blur' },
+        ],
+      },
     };
   },
 
@@ -226,7 +258,19 @@ export default {
   },
   methods: {
     handleCurrentChange() {
-
+      this.network().getOrderList()
+    },
+    onTimeChange() {
+      // eslint-disable-next-line
+      const [create_begin_time, create_end_time] = this.times?this.times:['','']
+      this.body = Object.assign({}, this.body, { create_begin_time, create_end_time })
+      this.handleCurrentChange()
+    },
+    onTimeChange1() {
+      // eslint-disable-next-line
+      const [pay_begin_time, pay_end_time] = this.times1?this.times1:['','']
+      this.body = Object.assign({}, this.body, { pay_begin_time, pay_end_time })
+      this.handleCurrentChange()
     },
     event() {
       return {
@@ -245,16 +289,6 @@ export default {
           if (status !== 200) return
           this.tableData = data.data
           this.total = data.total
-        },
-        delCategory: async (uuid) => {
-          const { status } = await delCategory(uuid)
-          if (status !== 200) return
-          this.network().GetFristCategory({ parent_uuid: this.$route.query.parent_uuid })
-          this.$notify({
-            title: '删除成功',
-            message: '删除二级分类成功',
-            type: 'success',
-          });
         },
       }
     },

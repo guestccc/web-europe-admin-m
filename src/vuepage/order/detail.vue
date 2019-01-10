@@ -3,115 +3,133 @@
     <h3>订单信息</h3>
     <el-table
       border
-      :data="conditionTable">
+      :data="body">
       <el-table-column
-        prop="priority"
+        prop="order_id"
         label="订单号"/>
       <el-table-column
-        prop="priority"
+        prop="create_time"
         label="创建时间"/>
       <el-table-column
-        prop="priority"
+        prop="name"
         label="用户昵称"/>
       <el-table-column
-        prop="priority"
+        prop="mobile"
         label="手机号"/>
       <el-table-column
-        prop="priority"
+        prop="money"
         label="订单金额"/>
       <el-table-column
-        prop="priority"
+        prop="pay_type"
         label="支付方式"/>
       <el-table-column
-        prop="priority"
+        prop="pay_time"
         label="支付时间"/>
       <el-table-column
-        prop="priority"
+        prop="status"
         label="订单状态"/>
       <el-table-column
-        prop="priority"
+        prop="invite_code"
         label="推荐人ID"/>
     </el-table>
     <h3>收货地址</h3>
     <el-table
       border
-      :data="pointTable">
+      :data="address">
       <el-table-column
-        prop="priority"
+        prop="name"
         label="收货人"/>
       <el-table-column
-        prop="priority"
+        prop="mobile"
         label="联系电话"/>
       <el-table-column
-        prop="priority"
-        label="收货地址"/>
+        label="收货地址">
+        <template slot-scope="scope">
+          <span>{{ scope.row.province }}{{ scope.row.city }}{{ scope.row.county }}{{ scope.row.detail_address }}</span>
+        </template>
+      </el-table-column>
     </el-table>
     <h3>商品信息</h3>
     <el-table
       border
-      :data="pointTable">
+      :data="product">
       <el-table-column
-        prop="priority"
-        label="商品图片"/>
+        label="商品图片">
+        <template slot-scope="scope">
+          <img
+            width="148px"
+            :src="imgDomain + scope.row.img_src"
+            alt="">
+        </template>
+      </el-table-column>
       <el-table-column
-        prop="priority"
+        align="center"
+        prop="product_name"
         label="商品标题"/>
       <el-table-column
-        prop="priority"
+        prop="standard_name"
         label="商品规格"/>
       <el-table-column
-        prop="priority"
+        prop="quantity"
         label="数量"/>
       <el-table-column
-        prop="priority"
+        prop="price"
         label="商品价格"/>
     </el-table>
-    <h3>物流信息</h3>
-    <el-table
-      border
-      :data="pointTable">
-      <el-table-column
-        prop="priority"
-        label="物流单号"/>
-      <el-table-column
-        prop="priority"
-        label="发货时间"/>
-      <el-table-column
-        prop="priority"
-        label="出发地"/>
-      <el-table-column
-        prop="priority"
-        label="目的地"/>
-    </el-table>
+    <div v-if="status !== '待支付' && status !=='待发货'">
+      <h3>物流信息</h3>
+      <el-table
+        border
+        :data="logistics">
+        <el-table-column
+          prop="logistics_num"
+          label="物流单号"/>
+        <el-table-column
+          prop="delivery_time"
+          label="发货时间"/>
+        <el-table-column
+          prop="origin"
+          label="出发地"/>
+        <el-table-column
+          prop="destination"
+          label="目的地"/>
+      </el-table>
+      <el-table
+        border
+        :data="logisticsDetail">
+        <el-table-column
+          prop="time"
+          label="时间"/>
+        <el-table-column
+          prop="address"
+          label="当前状态"/>
+      </el-table>
+    </div>
   </el-main>
 </template>
 
 <script>
+import { getOrderDetail } from '../../api/order'
+import { imgDomain } from '../../configs/env'
 
 export default {
   data() {
     return {
+      imgDomain,
       conditionTitle: false,
       conditionDialog: true,
-      body: {
-        money: '',
-      },
-      conditionTable: [
-        {
-
-        },
+      status: '',
+      body: [],
+      product: [
       ],
-      pointTable: [
-        {
-
-        },
-        {
-
-        },
+      logistics: [
       ],
+      logisticsDetail: [],
+      address: [],
     };
   },
   created() {
+    this.network().getOrderDetail()
   },
   methods: {
     event() {
@@ -120,6 +138,16 @@ export default {
     },
     network() {
       return {
+        getOrderDetail: async () => {
+          const { status, data } = await getOrderDetail(this.$route.query.uuid)
+          if (status !== 200) return
+          this.body = [data]
+          this.status = data.status
+          this.product = data.product
+          this.address = [data.address]
+          this.logisticsDetail = data.logistics_detail
+          this.logistics = [data.logistics]
+        },
       }
     },
     handler() {
