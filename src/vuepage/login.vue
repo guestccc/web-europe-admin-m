@@ -169,6 +169,17 @@ export default {
           ],
         },
         {
+          name: '数据统计',
+          children: [
+            {
+              name: '订单统计',
+            },
+            {
+              name: '收入统计',
+            },
+          ],
+        },
+        {
           name: '权限管理',
           children: [
             {

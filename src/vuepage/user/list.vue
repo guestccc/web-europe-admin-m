@@ -4,6 +4,7 @@
       <el-input
         placeholder="请输入分类名称进行搜索"
         v-model="body.keyword"
+        clearable
         @change="handleCurrentChange()"
         class="input-with-select dk_input">
         <el-button

@@ -1,6 +1,30 @@
 
 const list = [
   {
+    name: '收入统计',
+    menuItem: {
+      name: '收入统计',
+      iconClass: 'dk-icon-home',
+      route: '/statistics-management/income',
+    },
+  },
+  {
+    name: '订单统计',
+    menuItem: {
+      name: '订单统计',
+      iconClass: 'dk-icon-home',
+      route: '/statistics-management/order',
+    },
+  },
+  {
+    name: '数据统计',
+    menuItem: {
+      name: '数据统计',
+      iconClass: 'dk-icon-home',
+      route: '/statistics-management',
+    },
+  },
+  {
     name: '操作日志',
     menuItem: {
       name: '操作日志',
